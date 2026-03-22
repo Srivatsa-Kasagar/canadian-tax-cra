@@ -11,7 +11,6 @@
 | `/hst-reconciliation` | Reconcile GST/HST collected vs remitted across quarters — common pain point at year-end |
 | `/t4-generator` | Generate T4 slip summaries from payroll inputs; currently `/payroll-calc` stops at deductions |
 | `/holdco-checklist` | Holding company + opco structure is extremely common for Canadian owner-operators |
-| `/salary-vs-dividend` | The #1 question every CCPC owner asks — optimal mix calculator with 2026 rates |
 | Province depth | Most examples default to Ontario; add BC/AB/QC-specific nuances (QST, WSIB/WCB variants) |
 
 ### Medium Priority
