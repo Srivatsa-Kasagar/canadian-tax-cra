@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canadian Tax & CRA Compliance — Claude Code Plugin</title>
+  <meta name="description" content="A Claude Code plugin covering GST/HST, payroll deductions, corporate income tax (T2), and SR&ED grants for Canadian small business owners. Six slash commands, four auto-activating skills, and an interactive browser calculator." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    .gradient-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    }
+    .maple-accent { color: #dc2626; }
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    }
+    .code-block {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.75;
+      overflow-x: auto;
+    }
+    .code-block .cmd     { color: #60a5fa; }
+    .code-block .arg     { color: #86efac; }
+    .code-block .comment { color: #64748b; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(220,38,38,0.1);
+      border: 1px solid rgba(220,38,38,0.25);
+      color: #dc2626;
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .skill-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .command-tag {
+      font-family: 'JetBrains Mono', monospace;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .nav-link {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-link:hover { color: #e2e8f0; }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #dc2626;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+      margin: 0 auto;
+    }
+    .jurisdiction-pill {
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .output-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 4px;
+    }
+    .output-green  { background: #dcfce7; color: #16a34a; }
+    .output-blue   { background: #dbeafe; color: #1d4ed8; }
+    .output-orange { background: #fef3c7; color: #d97706; }
+    .output-red    { background: #fee2e2; color: #dc2626; }
+    .demo-block {
+      font-family: 'JetBrains Mono', monospace;
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      font-size: 0.82rem;
+      line-height: 1.9;
+      color: #cbd5e1;
+    }
+    .demo-block .user  { color: #60a5fa; }
+    .demo-block .skill { color: #86efac; }
+    .demo-block .dim   { color: #475569; }
+  </style>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+  <!-- NAV -->
+  <nav class="gradient-hero border-b border-white/10 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="text-2xl">🍁</span>
+        <span class="text-white font-semibold text-sm tracking-tight">Canadian Tax &amp; CRA Plugin</span>
+        <span class="text-xs bg-white/10 text-slate-300 px-2 py-0.5 rounded-full font-mono">v0.3.0</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#skills"     class="nav-link">Skills</a>
+        <a href="#commands"   class="nav-link">Commands</a>
+        <a href="#calculator" class="nav-link">Calculator</a>
+        <a href="#install"    class="nav-link">Install</a>
+        <a href="canadian-tax-calculator.html" class="text-white text-sm font-semibold bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition">Open Calculator →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="gradient-hero text-white pt-20 pb-24 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="flex items-center justify-center gap-3 mb-6 flex-wrap">
+        <span class="badge">Claude Code Plugin</span>
+        <span class="badge">4 Auto-Activating Skills</span>
+        <span class="badge">6 Slash Commands</span>
+      </div>
+
+      <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+        CRA Compliance,<br/>
+        <span class="maple-accent">in Plain Language</span>
+      </h1>
+
+      <p class="text-slate-300 text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
+        A self-contained Claude Code plugin covering GST/HST filing, payroll deductions,
+        corporate income tax (T2), and SR&amp;ED grants — for Canadian small business owners.
+        No tax background required. No API keys. No external connections.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-14">
+        <a href="#install" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-7 py-3 rounded-xl transition text-sm shadow-lg">
+          Install the Plugin
+        </a>
+        <a href="#commands" class="bg-white/10 hover:bg-white/15 text-white font-semibold px-7 py-3 rounded-xl transition text-sm border border-white/20">
+          See Commands
+        </a>
+        <a href="canadian-tax-calculator.html" class="bg-white/10 hover:bg-white/15 text-white font-semibold px-7 py-3 rounded-xl transition text-sm border border-white/20">
+          Open Calculator
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+        <div class="stat-card">
+          <div class="text-3xl font-bold text-white mb-1">6</div>
+          <div class="text-slate-400 text-sm">Slash Commands</div>
+        </div>
+        <div class="stat-card">
+          <div class="text-3xl font-bold text-white mb-1">4</div>
+          <div class="text-slate-400 text-sm">Auto Skills</div>
+        </div>
+        <div class="stat-card">
+          <div class="text-3xl font-bold text-white mb-1">13</div>
+          <div class="text-slate-400 text-sm">Provinces &amp; Territories</div>
+        </div>
+        <div class="stat-card">
+          <div class="text-3xl font-bold text-white mb-1">2026</div>
+          <div class="text-slate-400 text-sm">Rates &amp; Brackets</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JURISDICTION BAR -->
+  <section class="bg-slate-50 border-b border-slate-200 py-5 px-6">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-3">
+      <span class="text-slate-500 text-sm font-medium mr-2">Coverage:</span>
+      <span class="jurisdiction-pill">Federal (CRA)</span>
+      <span class="jurisdiction-pill">Ontario</span>
+      <span class="jurisdiction-pill">British Columbia</span>
+      <span class="jurisdiction-pill">Alberta</span>
+      <span class="jurisdiction-pill">Quebec</span>
+      <span class="jurisdiction-pill">All other provinces &amp; territories</span>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills" class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <p class="section-label mb-3">Auto-Activating Skills</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Deep CRA knowledge that loads automatically</h2>
+        <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">These skills activate when you mention relevant topics — no command needed. They encode CRA regulations, rates, and rules for 2026.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-5">
+
+        <div class="card-hover bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skill-icon bg-blue-50 text-blue-600">📊</div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-lg mb-1">GST/HST Compliance</h3>
+              <p class="text-slate-500 text-sm mb-3">Tax rates for all 13 provinces/territories, ITC rules and blocked categories, Quick Method calculation, zero-rated vs. exempt supplies, registration thresholds, and common filing mistakes.</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="command-tag">GST</span>
+                <span class="command-tag">HST</span>
+                <span class="command-tag">ITC</span>
+                <span class="command-tag">Quick Method</span>
+                <span class="command-tag">$30K threshold</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hover bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skill-icon bg-emerald-50 text-emerald-600">👤</div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-lg mb-1">Payroll &amp; Remittances</h3>
+              <p class="text-slate-500 text-sm mb-3">2026 CPP and EI rates, CPP2 second contribution, remittance schedules by remitter type, T4 preparation, Record of Employment, and employee vs. contractor classification test (RC4110).</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="command-tag">CPP</span>
+                <span class="command-tag">EI</span>
+                <span class="command-tag">T4</span>
+                <span class="command-tag">ROE</span>
+                <span class="command-tag">remittance</span>
+                <span class="command-tag">PD7A</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hover bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skill-icon bg-amber-50 text-amber-600">🏢</div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-lg mb-1">Corporate Tax (T2)</h3>
+              <p class="text-slate-500 text-sm mb-3">Filing deadlines, CCPC small business deduction ($500K limit), CCA classes, instalment methods, dividend types (eligible vs. non-eligible), shareholder loans, RDTOH/GRIP, and required T2 schedules.</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="command-tag">T2</span>
+                <span class="command-tag">CCPC</span>
+                <span class="command-tag">SBD</span>
+                <span class="command-tag">CCA</span>
+                <span class="command-tag">dividend</span>
+                <span class="command-tag">RDTOH</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hover bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="skill-icon bg-purple-50 text-purple-600">🔬</div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-lg mb-1">SR&amp;ED &amp; Government Grants</h3>
+              <p class="text-slate-500 text-sm mb-3">Three-part SR&amp;ED eligibility test, 35% refundable ITC for CCPCs, eligible expenditure categories, T661 filing requirements, IRAP, Canada Job Grant, CanExport, and provincial grant programs.</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="command-tag">SR&amp;ED</span>
+                <span class="command-tag">T661</span>
+                <span class="command-tag">IRAP</span>
+                <span class="command-tag">R&amp;D credit</span>
+                <span class="command-tag">grant</span>
+                <span class="command-tag">ITC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Demo -->
+      <div class="mt-10">
+        <div class="demo-block">
+          <span class="dim">// Skills activate automatically — just ask in plain English</span><br/><br/>
+          <span class="user">You:</span>  Do I need to register for GST if I just crossed $30,000?<br/>
+          <span class="skill">Plugin:</span> Yes — once your taxable revenues exceed $30,000 in a single<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; calendar quarter or any four consecutive quarters, registration<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; becomes mandatory. You have 29 days from the date you crossed<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; the threshold to register with CRA. Here's exactly what to do...<br/><br/>
+          <span class="dim">// gst-hst-compliance skill activated automatically</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl"></div>
+
+  <!-- COMMANDS -->
+  <section id="commands" class="py-20 px-6 bg-slate-50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <p class="section-label mb-3">Slash Commands</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Six commands for every CRA workflow</h2>
+        <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">Each command collects your inputs, applies CRA rules, and produces a structured, filing-ready output. Claude asks for any missing details in a single prompt.</p>
+      </div>
+
+      <div class="space-y-6">
+
+        <!-- gst-filing -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/gst-filing</code>
+            <p class="text-slate-600 text-sm mt-1">Calculates net GST/HST owing (or refund), breaks down every ITC by category, compares Quick Method vs. standard, and outputs the exact line numbers for CRA My Business Account filing.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">Net tax calc</span>
+              <span class="output-tag output-blue">ITC breakdown</span>
+              <span class="output-tag output-orange">Quick Method comparison</span>
+              <span class="output-tag output-blue">Lines 101/105/108/109</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/gst-filing</span> <span class="arg">Q2 2026 — Ontario. Sales: $85,000 consulting + $15,000 products.</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expenses: rent $5,000, software $2,000, meals $1,200, legal $3,000.</span>
+          </div>
+        </div>
+
+        <!-- payroll-calc -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/payroll-calc</code>
+            <p class="text-slate-600 text-sm mt-1">Calculates CPP, CPP2, EI, federal and provincial income tax for one pay period. Shows employee net pay, employer contributions, total CRA remittance, and flags when annual maximums will be reached.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">Net pay</span>
+              <span class="output-tag output-blue">Deduction breakdown</span>
+              <span class="output-tag output-orange">CRA remittance</span>
+              <span class="output-tag output-blue">Annual projection</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/payroll-calc</span> <span class="arg">Ontario, bi-weekly, $3,500 gross, basic personal TD1 only</span><br/>
+            <span class="cmd">/payroll-calc</span> <span class="arg">BC, semi-monthly, $5,200 gross, TD1 federal $16,129 + spousal $14,156</span>
+          </div>
+        </div>
+
+        <!-- cra-deadlines -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/cra-deadlines</code>
+            <p class="text-slate-600 text-sm mt-1">Generates every CRA deadline for your business profile: GST filings, payroll remittances, T4/T5s, corporate tax instalments, T2 filing, SR&amp;ED. Flags the three highest-penalty-risk dates with specific penalty amounts.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">12-month calendar</span>
+              <span class="output-tag output-red">Top 3 risk dates</span>
+              <span class="output-tag output-orange">Penalty amounts</span>
+              <span class="output-tag output-blue">Setup checklist</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/cra-deadlines</span> <span class="arg">Ontario corporation, December 31 year-end, quarterly GST, 3 employees</span>
+          </div>
+        </div>
+
+        <!-- sred-screen -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/sred-screen</code>
+            <p class="text-slate-600 text-sm mt-1">Applies the CRA three-part eligibility test (uncertainty, advancement, systematic investigation) to your project. Rates GREEN / YELLOW / RED, identifies documentation gaps, and estimates the refundable ITC cash value.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">GREEN / YELLOW / RED rating</span>
+              <span class="output-tag output-blue">CRA questions</span>
+              <span class="output-tag output-orange">Doc gaps</span>
+              <span class="output-tag output-green">ITC estimate</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/sred-screen</span> <span class="arg">We built a machine learning model to predict equipment failures.</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Existing models didn't generalize to our sensor data so we developed</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a custom architecture over 8 months of testing.</span>
+          </div>
+        </div>
+
+        <!-- grant-finder -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/grant-finder</code>
+            <p class="text-slate-600 text-sm mt-1">Matches your business profile to federal and provincial grant programs ranked by expected value. Covers IRAP, Canada Job Grant, WES, CanExport, and province-specific programs across all regions.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">Ranked programs</span>
+              <span class="output-tag output-blue">Amounts &amp; eligibility</span>
+              <span class="output-tag output-orange">Application effort</span>
+              <span class="output-tag output-blue">Quick wins</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/grant-finder</span> <span class="arg">Ontario SaaS startup, 8 employees, $1.2M revenue,</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;looking to fund developer hiring and AI R&amp;D work</span>
+          </div>
+        </div>
+
+        <!-- t2-checklist -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/t2-checklist</code>
+            <p class="text-slate-600 text-sm mt-1">Generates a tailored T2 preparation checklist for your corporation's income type and special items. Covers required schedules, documents to gather, common CPA errors, and an accountant meeting timeline.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">Document checklist</span>
+              <span class="output-tag output-blue">Required schedules</span>
+              <span class="output-tag output-red">Common errors</span>
+              <span class="output-tag output-orange">Filing timeline</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/t2-checklist</span> <span class="arg">Ontario corp, March 31 year-end, active business income,</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;purchased $40K equipment, paid $50K dividend to sole shareholder</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl"></div>
+
+  <!-- CALCULATOR -->
+  <section id="calculator" class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-14">
+        <p class="section-label mb-3">Interactive Tool</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Browser-based tax calculator</h2>
+        <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">Works standalone — no Claude Code required. Share it with your bookkeeper or use it for quick estimates. All calculations run locally in your browser.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 md:p-10 gradient-hero text-white flex flex-col md:flex-row gap-8 items-start md:items-center">
+        <div class="flex-1">
+          <div class="text-2xl mb-3">🍁</div>
+          <h3 class="text-2xl font-bold mb-3">Canadian Business Tax Calculator</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-5">An interactive calculator covering GST/HST net tax, Quick Method comparison, payroll deductions for all provinces, and a personalized CRA deadline calendar — no data leaves your device.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">GST/HST Calculator</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Payroll Deductions (2026)</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">CRA Deadline Calendar</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Quick Method comparison</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">All 13 provinces</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Print-ready</span>
+          </div>
+        </div>
+        <a href="canadian-tax-calculator.html" class="bg-white text-slate-900 font-semibold px-7 py-3 rounded-xl hover:bg-slate-100 transition text-sm shadow-lg whitespace-nowrap flex-shrink-0">
+          Open Calculator →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl"></div>
+
+  <!-- INSTALL -->
+  <section id="install" class="py-20 px-6 bg-slate-50">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="section-label mb-3">Installation</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Up and running in two steps</h2>
+        <p class="text-slate-500 mt-4 text-base">No API keys. No environment variables. No external services. Fully self-contained.</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+          <div>
+            <h3 class="font-bold text-slate-900">Install — one-time terminal step</h3>
+            <p class="text-slate-500 text-sm mt-0.5">Clone the repository and load it as a plugin when launching Claude Code.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="comment"># Clone the repository</span><br/>
+          git clone https://github.com/Srivatsa-Kasagar/canadian-tax-cra.git<br/>
+          <br/>
+          <span class="comment"># Launch Claude Code with the plugin loaded</span><br/>
+          claude --plugin ./canadian-tax-cra/plugin
+        </div>
+        <p class="text-slate-400 text-xs mt-3">Requires <a href="https://claude.ai/code" class="underline hover:text-slate-600">Claude Code CLI</a>. Fully self-contained — no keys or env vars needed.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-4">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+          <div>
+            <h3 class="font-bold text-slate-900">Use it — two ways, your choice</h3>
+            <p class="text-slate-500 text-sm mt-0.5">Once loaded, use structured slash commands or just ask in plain English. Both work.</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-5">
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-base">⚙️</span>
+              <h4 class="font-semibold text-slate-800 text-sm">Slash Commands</h4>
+              <span class="text-xs bg-blue-50 text-blue-600 border border-blue-100 rounded-full px-2 py-0.5 font-medium ml-auto">Structured output</span>
+            </div>
+            <p class="text-slate-500 text-xs mb-4">Use a command when you want a formatted filing summary, payroll calc, checklist, or grant list.</p>
+            <div class="code-block text-xs">
+              <span class="cmd">/gst-filing</span>   <span class="arg">Q2 2026 Ontario</span><br/>
+              <span class="cmd">/payroll-calc</span> <span class="arg">ON bi-weekly $3,500</span><br/>
+              <span class="cmd">/cra-deadlines</span> <span class="arg">corp Dec 31 ON</span><br/>
+              <span class="cmd">/sred-screen</span>  <span class="arg">[describe your R&amp;D]</span><br/>
+              <span class="cmd">/grant-finder</span> <span class="arg">Ontario SaaS startup</span><br/>
+              <span class="cmd">/t2-checklist</span> <span class="arg">ON corp Mar 31 YE</span>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-base">💬</span>
+              <h4 class="font-semibold text-slate-800 text-sm">Plain English</h4>
+              <span class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-2 py-0.5 font-medium ml-auto">Conversational</span>
+            </div>
+            <p class="text-slate-500 text-xs mb-4">Just ask naturally — skills auto-detect the domain and respond with plain-language CRA guidance.</p>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+              <p class="text-slate-600 text-xs italic">"Do I need to register for GST? My revenue just crossed $30K."</p>
+              <p class="text-slate-600 text-xs italic">"What's the remittance deadline for a regular payroll remitter?"</p>
+              <p class="text-slate-600 text-xs italic">"We did AI R&amp;D this year — could we qualify for SR&amp;ED?"</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl"></div>
+
+  <!-- MAINTENANCE TABLE -->
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="section-label mb-3">Annual Maintenance</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">What to update each year</h2>
+        <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">CRA publishes updated rates every November (CPP/EI) and February (tax brackets after the federal budget).</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">What Changes</th>
+              <th class="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">When CRA Publishes</th>
+              <th class="text-left px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hidden md:table-cell">Affected Files</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">CPP rates &amp; maximums</td>
+              <td class="px-6 py-4"><span class="bg-red-50 text-red-700 rounded-md px-2 py-0.5 text-xs font-bold">November</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">payroll-remittances/SKILL.md · payroll-calc.md · calculator</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">EI rates &amp; maximums</td>
+              <td class="px-6 py-4"><span class="bg-red-50 text-red-700 rounded-md px-2 py-0.5 text-xs font-bold">November</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">payroll-remittances/SKILL.md · payroll-calc.md · calculator</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">Federal &amp; provincial tax brackets</td>
+              <td class="px-6 py-4"><span class="bg-amber-50 text-amber-700 rounded-md px-2 py-0.5 text-xs font-bold">February</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">payroll-remittances/SKILL.md · payroll-calc.md · calculator</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">CCA class cost limits</td>
+              <td class="px-6 py-4"><span class="bg-amber-50 text-amber-700 rounded-md px-2 py-0.5 text-xs font-bold">February</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">corporate-tax-t2/SKILL.md · t2-checklist.md</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">SR&amp;ED ITC rates / limits</td>
+              <td class="px-6 py-4"><span class="bg-amber-50 text-amber-700 rounded-md px-2 py-0.5 text-xs font-bold">February</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">sred-grants/SKILL.md · sred-screen.md</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-6 py-4 font-medium text-slate-800">Grant program availability</td>
+              <td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 rounded-md px-2 py-0.5 text-xs font-bold">Ongoing</span></td>
+              <td class="px-6 py-4 text-slate-500 text-xs hidden md:table-cell font-mono">sred-grants/SKILL.md · grant-finder.md</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl"></div>
+
+  <!-- DISCLAIMER -->
+  <section class="py-12 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+        <div class="flex items-start gap-3">
+          <span class="text-amber-500 text-xl flex-shrink-0">⚠️</span>
+          <div>
+            <h4 class="font-bold text-amber-800 mb-2">Important Disclaimer</h4>
+            <p class="text-amber-700 text-sm leading-relaxed">
+              This plugin provides general tax and CRA compliance information for educational and reference purposes only.
+              It is <strong>not tax advice, legal advice, or a substitute for professional guidance</strong>.
+              Canadian tax rules are complex, change annually, and depend heavily on your specific circumstances.
+              Always have a CPA or tax professional review your filings and any material tax decisions.
+              CRA is the authoritative source — verify rates, deadlines, and rules at <strong>canada.ca/en/revenue-agency</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="gradient-hero border-t border-white/10 py-10 px-6">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-center md:text-left">
+        <div class="flex items-center gap-2 justify-center md:justify-start mb-1">
+          <span class="text-lg">🍁</span>
+          <span class="text-white font-semibold text-sm">Canadian Tax &amp; CRA Compliance Plugin</span>
+        </div>
+        <div class="text-slate-400 text-xs">A Claude Code Plugin by Srivatsa Kasagar &mdash; v0.3.0 &mdash; 2026 rates</div>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+        <span>GST/HST &bull; Payroll &bull; T2 Corporate Tax &bull; SR&amp;ED &bull; Grants</span>
+      </div>
+      <div class="text-slate-500 text-xs text-center md:text-right">
+        Federal obligations &bull; All provinces &amp; territories<br/>
+        For informational purposes only. Not tax or legal advice.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+    });
+  </script>
+
+</body>
+</html>

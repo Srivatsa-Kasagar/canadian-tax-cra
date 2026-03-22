@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canadian Business Tax Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+    /* ── GRADIENT NAV ── */
+    .gradient-hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); }
+
+    /* ── TABS ── */
+    .tabs { background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; padding: 0 24px; }
+    .tab {
+      padding: 13px 20px; cursor: pointer; font-size: 13px; font-weight: 500;
+      color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.18s; white-space: nowrap;
+    }
+    .tab.active { color: #dc2626; border-bottom-color: #dc2626; font-weight: 600; }
+    .tab:hover:not(.active) { color: #334155; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+    .pane { display: none; }
+    .pane.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    @media (max-width: 800px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .container { padding: 16px; }
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .card h2 {
+      font-size: 14px; font-weight: 700; margin-bottom: 18px; color: #1e293b;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card h2 .icon { font-size: 17px; }
+
+    /* ── FORM ELEMENTS ── */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 600; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+    }
+    .field select, .field input {
+      width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0;
+      border-radius: 10px; font-size: 13px; color: #1e293b;
+      background: #fff; transition: border-color 0.18s; appearance: none;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .field select:focus, .field input:focus { outline: none; border-color: #dc2626; }
+    .field .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+    /* ── LINE ITEMS ── */
+    .line-item {
+      display: grid; grid-template-columns: 1fr 120px 120px 28px;
+      gap: 8px; align-items: center; margin-bottom: 8px;
+    }
+    .line-item input, .line-item select {
+      padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: 13px; color: #1e293b; background: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .line-item input:focus, .line-item select:focus { outline: none; border-color: #dc2626; }
+    .line-item .remove-btn {
+      background: none; border: none; color: #cbd5e1; cursor: pointer;
+      font-size: 18px; line-height: 1; padding: 0 2px; transition: color 0.18s;
+    }
+    .line-item .remove-btn:hover { color: #dc2626; }
+    .col-header { display: grid; grid-template-columns: 1fr 120px 120px 28px; gap: 8px; margin-bottom: 6px; }
+    .col-header span { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    .add-btn {
+      margin-top: 8px; background: none; border: 1.5px dashed #e2e8f0;
+      border-radius: 10px; color: #2563eb; font-size: 13px; font-weight: 500;
+      padding: 8px 16px; cursor: pointer; width: 100%; transition: all 0.18s;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .add-btn:hover { background: #eff6ff; border-color: #93c5fd; }
+
+    /* ── RESULTS ── */
+    .result-card {
+      background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: 12px; padding: 20px;
+    }
+    .result-card.owing  { background: #fff5f5; border-color: #fecaca; }
+    .result-card.refund { background: #f0fdf4; border-color: #bbf7d0; }
+
+    .result-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row .label { color: #64748b; }
+    .result-row .value { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .result-row.total {
+      margin-top: 8px; padding-top: 12px; border-top: 2px solid #e2e8f0;
+      border-bottom: none; font-size: 15px;
+    }
+    .result-row.total .label { color: #1e293b; font-weight: 700; }
+    .result-row.total .value { font-size: 20px; }
+    .owing-amount  { color: #dc2626; }
+    .refund-amount { color: #16a34a; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-red    { background: #fee2e2; color: #dc2626; }
+    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-orange { background: #fef3c7; color: #d97706; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+
+    /* ── QUICK METHOD ── */
+    .qm-box {
+      background: #fffbeb; border: 1.5px solid #fde68a;
+      border-radius: 12px; padding: 16px; margin-top: 16px;
+    }
+    .qm-box h3 { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 10px; }
+    .qm-row {
+      display: flex; justify-content: space-between; font-size: 13px;
+      padding: 4px 0; color: #78350f;
+    }
+    .qm-row strong { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── DEADLINE BOX ── */
+    .deadline-box {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      padding: 14px 16px; margin-top: 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .deadline-icon { font-size: 22px; }
+    .deadline-text { font-size: 13px; }
+    .deadline-text strong { display: block; color: #1e293b; font-size: 14px; margin-bottom: 2px; }
+    .deadline-text span { color: #64748b; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;
+      border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+      border: none; transition: all 0.18s; font-family: 'Inter', system-ui, sans-serif;
+    }
+    .btn-primary { background: #dc2626; color: white; }
+    .btn-primary:hover { background: #b91c1c; }
+    .btn-secondary { background: #fff; color: #334155; border: 1.5px solid #e2e8f0; }
+    .btn-secondary:hover { background: #f8fafc; }
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    /* ── PAYROLL ── */
+    .deduction-breakdown { margin-top: 12px; }
+    .deduction-section   { margin-bottom: 16px; }
+    .deduction-section h4 {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: #94a3b8; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+    }
+    .deduction-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; }
+    .deduction-row .d-label { color: #64748b; }
+    .deduction-row .d-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: #eff6ff; border-left: 3px solid #3b82f6;
+      border-radius: 0 8px 8px 0; padding: 12px 14px; font-size: 13px;
+      color: #1e40af; margin-bottom: 16px; line-height: 1.6;
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      font-size: 11px; color: #94a3b8; margin-top: 16px; padding: 10px 12px;
+      background: #f8fafc; border-radius: 8px; line-height: 1.5;
+    }
+
+    /* ── DEADLINE GRID ── */
+    .deadline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 20px; }
+    .deadline-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .deadline-card .dc-month {
+      background: #dc2626; color: white; border-radius: 10px;
+      padding: 8px 10px; text-align: center; min-width: 52px;
+    }
+    .deadline-card .dc-month .m { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .deadline-card .dc-month .d { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .deadline-card .dc-body h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .deadline-card .dc-body p  { font-size: 12px; color: #64748b; line-height: 1.5; }
+    .deadline-card .dc-body .tags { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+
+    /* ── RATE DISPLAY ── */
+    #rate-display { font-size: 28px; font-weight: 800; color: #dc2626; margin-bottom: 6px; font-family: 'Inter', system-ui, sans-serif; }
+    #rate-note    { font-size: 13px; color: #64748b; }
+    #pst-note     { font-size: 12px; color: #d97706; margin-top: 6px; display: none; }
+
+    /* ── VEHICLE PCT ROW ── */
+    .vehicle-pct-label { font-size: 11px; color: #64748b; }
+
+    /* ── PRINT ── */
+    @media print {
+      .tabs, .add-btn, .btn-row, .disclaimer { display: none; }
+      nav { display: none; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="gradient-hero border-b border-white/10 sticky top-0 z-50">
+  <div style="max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:22px;">🍁</span>
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:-0.2px;">Canadian Business Tax Calculator</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;">GST/HST · Payroll · CRA Deadlines · 2026 Rates</div>
+      </div>
+    </div>
+    <a href="index.html" style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,0.25);padding:6px 14px;border-radius:8px;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+      ← Plugin Home
+    </a>
+  </div>
+</nav>
+
+<!-- ── TABS ── -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('gst', event)">📊 GST/HST Calculator</div>
+  <div class="tab" onclick="switchTab('payroll', event)">👤 Payroll Deductions</div>
+  <div class="tab" onclick="switchTab('deadlines', event)">📅 CRA Deadlines</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 1 — GST/HST CALCULATOR
+     ════════════════════════════════════════════ -->
+<div id="pane-gst" class="pane active">
+<div class="container">
+  <div class="grid-2" style="align-items:start;">
+
+    <!-- LEFT: INPUTS -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Setup -->
+      <div class="card">
+        <h2><span class="icon">⚙️</span> Filing Setup</h2>
+        <div class="grid-2">
+          <div class="field">
+            <label>Province / Territory</label>
+            <select id="province" onchange="recalcGST()">
+              <option value="AB">Alberta (5% GST)</option>
+              <option value="BC">British Columbia (5% GST)</option>
+              <option value="MB">Manitoba (5% GST)</option>
+              <option value="NB">New Brunswick (15% HST)</option>
+              <option value="NL">Newfoundland &amp; Labrador (15% HST)</option>
+              <option value="NS">Nova Scotia (15% HST)</option>
+              <option value="NT">Northwest Territories (5% GST)</option>
+              <option value="NU">Nunavut (5% GST)</option>
+              <option value="ON" selected>Ontario (13% HST)</option>
+              <option value="PE">Prince Edward Island (15% HST)</option>
+              <option value="QC">Quebec (5% GST + QST separate)</option>
+              <option value="SK">Saskatchewan (5% GST)</option>
+              <option value="YT">Yukon (5% GST)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Reporting Period</label>
+            <select id="period" onchange="recalcGST()">
+              <option value="Q1">Q1 (Jan–Mar)</option>
+              <option value="Q2">Q2 (Apr–Jun)</option>
+              <option value="Q3">Q3 (Jul–Sep)</option>
+              <option value="Q4">Q4 (Oct–Dec)</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Annual">Annual</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Filing Year</label>
+            <select id="filingYear" onchange="recalcGST()">
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Annual Revenue (approx.)</label>
+            <input type="number" id="annualRevenue" placeholder="e.g. 250000" oninput="recalcGST()" />
+            <div class="hint">Used to check Quick Method eligibility (≤ $400K)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue -->
+      <div class="card">
+        <h2><span class="icon">💰</span> Revenue (Sales)</h2>
+        <div class="col-header">
+          <span>Description</span>
+          <span>Amount ($)</span>
+          <span>Supply Type</span>
+          <span></span>
+        </div>
+        <div class="line-items" id="revenue-items"></div>
+        <button class="add-btn" onclick="addRevenueLine()">+ Add Revenue Line</button>
+      </div>
+
+      <!-- Expenses / ITCs -->
+      <div class="card">
+        <h2><span class="icon">🧾</span> Expenses (Input Tax Credits)</h2>
+        <div class="info-box">
+          Only include business expenses where you paid GST/HST. Personal expenses are not eligible. Meals &amp; entertainment are 50% claimable.
+        </div>
+        <div class="col-header">
+          <span>Description</span>
+          <span>Amount ($)</span>
+          <span>ITC Type</span>
+          <span></span>
+        </div>
+        <div class="line-items" id="expense-items"></div>
+        <button class="add-btn" onclick="addExpenseLine()">+ Add Expense Line</button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Rate Info -->
+      <div class="card">
+        <h2><span class="icon">📌</span> Applicable Tax Rate</h2>
+        <div id="rate-display">13% HST</div>
+        <div id="rate-note">Ontario Harmonized Sales Tax</div>
+        <div id="pst-note"></div>
+      </div>
+
+      <!-- Results -->
+      <div class="card" id="results-card">
+        <h2><span class="icon">📋</span> Filing Summary</h2>
+
+        <div id="result-main" class="result-card">
+          <div class="result-row">
+            <span class="label">Total Taxable Sales</span>
+            <span class="value" id="r-sales">$0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="label">GST/HST Collected on Sales</span>
+            <span class="value" id="r-collected">$0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Input Tax Credits (ITCs)</span>
+            <span class="value" id="r-itc" style="color:#16a34a;">−$0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Blocked / Partial ITCs</span>
+            <span class="value" id="r-blocked" style="color:#94a3b8;">$0.00</span>
+          </div>
+          <div class="result-row total">
+            <span class="label" id="r-label">Net Tax</span>
+            <span class="value" id="r-net">$0.00</span>
+          </div>
+          <div style="margin-top:10px;text-align:center;" id="r-status-badge">
+            <span class="badge badge-blue">Enter amounts above</span>
+          </div>
+        </div>
+
+        <!-- Quick Method -->
+        <div id="qm-section" class="qm-box" style="display:none;">
+          <h3>⚡ Quick Method Comparison</h3>
+          <div id="qm-content"></div>
+        </div>
+
+        <!-- Deadline -->
+        <div class="deadline-box" id="deadline-display">
+          <div class="deadline-icon">📅</div>
+          <div class="deadline-text">
+            <strong id="dl-title">Filing Deadline</strong>
+            <span id="dl-date">Select period and year above</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Print Summary</button>
+          <button class="btn btn-secondary" onclick="resetGST()">↺ Reset</button>
+        </div>
+
+        <div class="disclaimer">
+          ⚠️ This calculator provides estimates only. Verify all amounts with your bookkeeper or CPA before filing. Tax rates and rules are subject to change. Always confirm your filing deadline with CRA My Business Account.
+        </div>
+      </div>
+
+      <!-- ITC Detail -->
+      <div class="card" id="itc-detail-card" style="display:none;">
+        <h2><span class="icon">🔍</span> ITC Breakdown</h2>
+        <div id="itc-detail-rows"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 2 — PAYROLL DEDUCTIONS
+     ════════════════════════════════════════════ -->
+<div id="pane-payroll" class="pane">
+<div class="container">
+  <div class="grid-2" style="align-items:start;">
+
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card">
+        <h2><span class="icon">👤</span> Employee Details</h2>
+        <div class="grid-2">
+          <div class="field">
+            <label>Province of Employment</label>
+            <select id="pay-province" onchange="recalcPayroll()">
+              <option value="AB">Alberta</option>
+              <option value="BC">British Columbia</option>
+              <option value="MB">Manitoba</option>
+              <option value="NB">New Brunswick</option>
+              <option value="NL">Newfoundland &amp; Labrador</option>
+              <option value="NS">Nova Scotia</option>
+              <option value="NT">Northwest Territories</option>
+              <option value="NU">Nunavut</option>
+              <option value="ON" selected>Ontario</option>
+              <option value="PE">Prince Edward Island</option>
+              <option value="QC">Quebec</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="YT">Yukon</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pay Period</label>
+            <select id="pay-period" onchange="recalcPayroll()">
+              <option value="52">Weekly (52/year)</option>
+              <option value="26" selected>Bi-weekly (26/year)</option>
+              <option value="24">Semi-monthly (24/year)</option>
+              <option value="12">Monthly (12/year)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Gross Pay This Period ($)</label>
+            <input type="number" id="gross-pay" placeholder="e.g. 3500" oninput="recalcPayroll()" />
+          </div>
+          <div class="field">
+            <label>TD1 Federal Claim ($)</label>
+            <input type="number" id="td1-federal" value="16129" oninput="recalcPayroll()" />
+            <div class="hint">2026 Basic Personal Amount: $16,129</div>
+          </div>
+          <div class="field">
+            <label>TD1 Provincial Claim ($)</label>
+            <input type="number" id="td1-provincial" value="11865" oninput="recalcPayroll()" />
+            <div class="hint">2026 ON Basic Personal: $11,865</div>
+          </div>
+          <div class="field">
+            <label>Employee Age</label>
+            <select id="emp-age" onchange="recalcPayroll()">
+              <option value="working">Under 65 (CPP applies)</option>
+              <option value="65-70">65–70 (CPP optional)</option>
+              <option value="70plus">70+ (CPP exempt)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card">
+        <h2><span class="icon">📊</span> Payroll Summary — 2026 Rates</h2>
+
+        <div class="deduction-breakdown">
+          <div class="deduction-section">
+            <h4>Employee Deductions</h4>
+            <div class="deduction-row"><span class="d-label">CPP Contribution (5.95%)</span><span class="d-value" id="p-cpp-ee">—</span></div>
+            <div class="deduction-row"><span class="d-label">CPP2 Second Contribution</span><span class="d-value" id="p-cpp2-ee">—</span></div>
+            <div class="deduction-row"><span class="d-label">EI Premium (1.66%)</span><span class="d-value" id="p-ei-ee">—</span></div>
+            <div class="deduction-row"><span class="d-label">Federal Income Tax</span><span class="d-value" id="p-fed-tax">—</span></div>
+            <div class="deduction-row"><span class="d-label">Provincial Income Tax</span><span class="d-value" id="p-prov-tax">—</span></div>
+            <div class="deduction-row" style="border-top:1px solid #e2e8f0;margin-top:6px;padding-top:6px;font-weight:600;">
+              <span class="d-label" style="color:#1e293b;">Total Deductions</span>
+              <span class="d-value" id="p-total-deductions" style="color:#dc2626;">—</span>
+            </div>
+            <div class="deduction-row" style="font-weight:700;font-size:15px;">
+              <span class="d-label" style="color:#1e293b;">Net Pay to Employee</span>
+              <span class="d-value" id="p-net-pay" style="color:#16a34a;">—</span>
+            </div>
+          </div>
+
+          <div class="deduction-section">
+            <h4>Employer Costs</h4>
+            <div class="deduction-row"><span class="d-label">CPP Matching (5.95%)</span><span class="d-value" id="p-cpp-er">—</span></div>
+            <div class="deduction-row"><span class="d-label">EI Employer Premium (1.4×)</span><span class="d-value" id="p-ei-er">—</span></div>
+            <div class="deduction-row" style="border-top:1px solid #e2e8f0;margin-top:6px;padding-top:6px;font-weight:700;font-size:15px;">
+              <span class="d-label" style="color:#1e293b;">Total CRA Remittance</span>
+              <span class="d-value" id="p-remittance" style="color:#1d4ed8;">—</span>
+            </div>
+            <div class="deduction-row" style="font-weight:600;">
+              <span class="d-label" style="color:#1e293b;">Total Employer Cost</span>
+              <span class="d-value" id="p-total-cost">—</span>
+            </div>
+          </div>
+
+          <div id="p-remittance-deadline" class="deadline-box" style="display:none;margin-top:0;">
+            <div class="deadline-icon">📅</div>
+            <div class="deadline-text">
+              <strong id="p-dl-title">Remittance Deadline</strong>
+              <span id="p-dl-note">Regular remitters: 15th of following month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+          <button class="btn btn-secondary" onclick="resetPayroll()">↺ Reset</button>
+        </div>
+        <div class="disclaimer">
+          ⚠️ Tax estimates use simplified marginal rate calculations. Actual withholding amounts depend on all pay periods year-to-date and must be calculated using CRA's Payroll Deductions Online Calculator (PDOC) or T4032 tables. CPP/EI maximums must be tracked across the full calendar year.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 3 — CRA DEADLINES
+     ════════════════════════════════════════════ -->
+<div id="pane-deadlines" class="pane">
+<div class="container">
+  <div class="card" style="margin-bottom:20px;">
+    <h2><span class="icon">⚙️</span> Your Business Profile</h2>
+    <div class="grid-3">
+      <div class="field">
+        <label>Business Type</label>
+        <select id="dl-biz-type" onchange="renderDeadlines()">
+          <option value="corp">Corporation (T2)</option>
+          <option value="sole">Sole Proprietor / Partnership</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>GST/HST Filing Frequency</label>
+        <select id="dl-gst-freq" onchange="renderDeadlines()">
+          <option value="quarterly">Quarterly</option>
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual</option>
+          <option value="none">Not registered</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fiscal Year-End Month</label>
+        <select id="dl-fye" onchange="renderDeadlines()">
+          <option value="1">January 31</option>
+          <option value="2">February 28/29</option>
+          <option value="3">March 31</option>
+          <option value="4">April 30</option>
+          <option value="5">May 31</option>
+          <option value="6">June 30</option>
+          <option value="7">July 31</option>
+          <option value="8">August 31</option>
+          <option value="9">September 30</option>
+          <option value="10">October 31</option>
+          <option value="11">November 30</option>
+          <option value="12" selected>December 31</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:0;">
+      <div class="field">
+        <label>Employees?</label>
+        <select id="dl-has-employees" onchange="renderDeadlines()">
+          <option value="yes">Yes — have employees on payroll</option>
+          <option value="no">No employees</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Calendar Year</label>
+        <select id="dl-year" onchange="renderDeadlines()">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="deadline-list" class="deadline-grid"></div>
+  <div class="disclaimer" style="margin-top:16px;">
+    ⚠️ Deadline dates shown are general guidelines. Exact dates depend on your specific registration date, filing history, and CRA account status. When a deadline falls on a weekend or holiday, it is generally extended to the next business day. Always verify with CRA My Business Account at canada.ca/en/revenue-agency.
+  </div>
+</div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════
+// TAX RATES DATA
+// ══════════════════════════════════════════════
+const taxRates = {
+  AB: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Alberta — Federal GST only. No provincial sales tax.' },
+  BC: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'BC — Federal GST only. PST (7%) is collected separately by the province.', pst: 'PST 7% is collected separately by the BC government.' },
+  MB: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Manitoba — Federal GST only. RST (7%) is collected separately.', pst: 'RST 7% is collected separately by Manitoba Finance.' },
+  NB: { rate: 0.15, name: 'HST',  label: '15% HST', note: 'New Brunswick — Harmonized Sales Tax (5% federal + 10% provincial).' },
+  NL: { rate: 0.15, name: 'HST',  label: '15% HST', note: 'Newfoundland & Labrador — Harmonized Sales Tax (5% federal + 10% provincial).' },
+  NS: { rate: 0.15, name: 'HST',  label: '15% HST', note: 'Nova Scotia — Harmonized Sales Tax (5% federal + 10% provincial).' },
+  NT: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Northwest Territories — Federal GST only. No territorial sales tax.' },
+  NU: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Nunavut — Federal GST only. No territorial sales tax.' },
+  ON: { rate: 0.13, name: 'HST',  label: '13% HST', note: 'Ontario — Harmonized Sales Tax (5% federal + 8% provincial).' },
+  PE: { rate: 0.15, name: 'HST',  label: '15% HST', note: 'Prince Edward Island — Harmonized Sales Tax (5% federal + 10% provincial).' },
+  QC: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Quebec — Federal GST only (filed with CRA). QST (9.975%) is administered separately by Revenu Québec.', pst: 'QST 9.975% is collected separately by Revenu Québec. File QST returns at revenuquebec.ca.' },
+  SK: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Saskatchewan — Federal GST only. PST (6%) is collected separately.', pst: 'PST 6% is collected separately by Saskatchewan Finance.' },
+  YT: { rate: 0.05, name: 'GST',  label: '5% GST',  note: 'Yukon — Federal GST only. No territorial sales tax.' },
+};
+
+// Quick Method rates (remittance rate applied to gross sales incl. tax)
+const quickMethodRates = {
+  service_5:  0.036,
+  service_13: 0.088,
+  service_15: 0.104,
+  retail_5:   0.018,
+  retail_13:  0.050,
+  retail_15:  0.060,
+};
+
+// Revenue types
+const revenueTypes = {
+  taxable: { label: 'Taxable Supply', taxable: true  },
+  zero:    { label: 'Zero-Rated',     taxable: false },
+  exempt:  { label: 'Exempt',         taxable: false },
+};
+
+// ══════════════════════════════════════════════
+// TAB SWITCHER
+// ══════════════════════════════════════════════
+function switchTab(id, event) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+// GST/HST CALCULATOR
+// ══════════════════════════════════════════════
+let revenueLines = [], expenseLines = [], rLineId = 0, eLineId = 0;
+
+function addRevenueLine(desc='', amount='', type='taxable') {
+  const id = rLineId++;
+  revenueLines.push(id);
+  const container = document.getElementById('revenue-items');
+  const div = document.createElement('div');
+  div.className = 'line-item';
+  div.id = 'r-' + id;
+  div.innerHTML = `
+    <input type="text" placeholder="e.g. Consulting services" value="${desc}" oninput="recalcGST()" style="font-family:'Inter',system-ui,sans-serif;" />
+    <input type="number" placeholder="0.00" value="${amount}" oninput="recalcGST()" />
+    <select onchange="recalcGST()" style="font-family:'Inter',system-ui,sans-serif;">
+      <option value="taxable" ${type==='taxable'?'selected':''}>Taxable</option>
+      <option value="zero"    ${type==='zero'   ?'selected':''}>Zero-rated</option>
+      <option value="exempt"  ${type==='exempt' ?'selected':''}>Exempt</option>
+    </select>
+    <button class="remove-btn" onclick="removeLine('r-${id}')">×</button>
+  `;
+  container.appendChild(div);
+  recalcGST();
+}
+
+function addExpenseLine(desc='', amount='', type='full') {
+  const id = eLineId++;
+  expenseLines.push(id);
+  const container = document.getElementById('expense-items');
+  const wrapper = document.createElement('div');
+  wrapper.id = 'ew-' + id;
+  wrapper.innerHTML = `
+    <div class="line-item" id="e-${id}">
+      <input type="text" placeholder="e.g. Office rent" value="${desc}" oninput="recalcGST()" style="font-family:'Inter',system-ui,sans-serif;" />
+      <input type="number" placeholder="0.00" value="${amount}" oninput="recalcGST()" />
+      <select onchange="toggleVehiclePct('${id}'); recalcGST()" style="font-family:'Inter',system-ui,sans-serif;">
+        <option value="full"    ${type==='full'   ?'selected':''}>Full ITC</option>
+        <option value="meals"   ${type==='meals'  ?'selected':''}>Meals (50%)</option>
+        <option value="vehicle" ${type==='vehicle'?'selected':''}>Vehicle (biz%)</option>
+        <option value="blocked" ${type==='blocked'?'selected':''}>Blocked</option>
+      </select>
+      <button class="remove-btn" onclick="removeLine('ew-${id}')">×</button>
+    </div>
+    <div id="vpct-${id}" style="display:${type==='vehicle'?'flex':'none'};align-items:center;gap:6px;padding:2px 4px 8px 4px;font-size:12px;color:#64748b;">
+      <span class="vehicle-pct-label">Business use:</span>
+      <input type="number" min="1" max="100" value="70" placeholder="70" style="width:62px;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;font-family:'Inter',system-ui,sans-serif;" oninput="recalcGST()" />
+      <span>%</span>
+      <span style="color:#d97706;font-size:11px;">Enter actual % of vehicle used for business</span>
+    </div>
+  `;
+  container.appendChild(wrapper);
+  recalcGST();
+}
+
+function toggleVehiclePct(id) {
+  const sel = document.querySelector(`#e-${id} select`);
+  const pctRow = document.getElementById('vpct-' + id);
+  if (pctRow) pctRow.style.display = sel.value === 'vehicle' ? 'flex' : 'none';
+}
+
+function removeLine(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  recalcGST();
+}
+
+function recalcGST() {
+  const prov   = document.getElementById('province').value;
+  const period = document.getElementById('period').value;
+  const year   = document.getElementById('filingYear').value;
+  const annualRev = parseFloat(document.getElementById('annualRevenue').value) || 0;
+  const info = taxRates[prov];
+
+  // Update rate display
+  document.getElementById('rate-display').textContent = info.label;
+  document.getElementById('rate-note').textContent = info.note;
+  const pstNote = document.getElementById('pst-note');
+  if (info.pst) { pstNote.textContent = '⚠️ ' + info.pst; pstNote.style.display = 'block'; }
+  else { pstNote.style.display = 'none'; }
+
+  // Collect revenue lines
+  const rItems = document.querySelectorAll('#revenue-items .line-item');
+  let totalSales = 0, taxCollected = 0;
+  rItems.forEach(item => {
+    const inputs = item.querySelectorAll('input');
+    const sel = item.querySelector('select');
+    const amt = parseFloat(inputs[1].value) || 0;
+    totalSales += amt;
+    if (sel.value === 'taxable') taxCollected += amt * info.rate;
+  });
+
+  // Collect expense lines
+  const eItems = document.querySelectorAll('#expense-items .line-item');
+  let totalItc = 0, totalBlocked = 0;
+  const itcDetail = [];
+  eItems.forEach(item => {
+    const inputs = item.querySelectorAll('input');
+    const sel = item.querySelector('select');
+    const desc = inputs[0].value || 'Expense';
+    const amt  = parseFloat(inputs[1].value) || 0;
+    const type = sel.value;
+    let rate;
+    if (type === 'vehicle') {
+      const eId = item.id.replace('e-', '');
+      const pctInput = document.querySelector(`#vpct-${eId} input`);
+      const pct = pctInput ? (parseFloat(pctInput.value) || 0) / 100 : 0;
+      rate = Math.min(1, Math.max(0, pct));
+    } else {
+      const rates = { full: 1.0, meals: 0.5, blocked: 0.0 };
+      rate = rates[type] ?? 1.0;
+    }
+    const taxPaid = amt * info.rate;
+    const itcAmt  = taxPaid * rate;
+    const blocked = taxPaid - itcAmt;
+    totalItc     += itcAmt;
+    totalBlocked += blocked;
+    if (amt > 0) itcDetail.push({ desc, amt, taxPaid, itcAmt, blocked, type });
+  });
+
+  const netTax = taxCollected - totalItc;
+
+  // Update results
+  document.getElementById('r-sales').textContent     = '$' + totalSales.toFixed(2);
+  document.getElementById('r-collected').textContent = '$' + taxCollected.toFixed(2);
+  document.getElementById('r-itc').textContent       = '−$' + totalItc.toFixed(2);
+  document.getElementById('r-blocked').textContent   = '$' + totalBlocked.toFixed(2);
+
+  const netEl      = document.getElementById('r-net');
+  const labelEl    = document.getElementById('r-label');
+  const resultCard = document.getElementById('result-main');
+  const badgeEl    = document.getElementById('r-status-badge');
+
+  if (totalSales === 0 && totalItc === 0) {
+    netEl.textContent = '$0.00'; netEl.className = 'value';
+    labelEl.textContent = 'Net Tax'; resultCard.className = 'result-card';
+    badgeEl.innerHTML = '<span class="badge badge-blue">Enter amounts above</span>';
+  } else if (netTax >= 0) {
+    netEl.textContent = '$' + netTax.toFixed(2); netEl.className = 'value owing-amount';
+    labelEl.textContent = 'Net Tax OWING to CRA'; resultCard.className = 'result-card owing';
+    badgeEl.innerHTML = '<span class="badge badge-red">Remit to CRA</span>';
+  } else {
+    netEl.textContent = '$' + Math.abs(netTax).toFixed(2); netEl.className = 'value refund-amount';
+    labelEl.textContent = 'Net Refund DUE to You'; resultCard.className = 'result-card refund';
+    badgeEl.innerHTML = '<span class="badge badge-green">Refund / Credit</span>';
+  }
+
+  // Quick Method
+  const qmSection = document.getElementById('qm-section');
+  const qmContent = document.getElementById('qm-content');
+  if (annualRev > 0 && annualRev <= 400000 && totalSales > 0) {
+    const grossWithTax = totalSales * (1 + info.rate);
+    let qmKey;
+    if (info.rate === 0.05) qmKey = 'service_5';
+    else if (info.rate === 0.13) qmKey = 'service_13';
+    else qmKey = 'service_15';
+    const qmRate = quickMethodRates[qmKey];
+    const qmTax  = grossWithTax * qmRate;
+    const saving = netTax - qmTax;
+    qmContent.innerHTML = `
+      <div class="qm-row"><span>Quick Method remittance rate</span><strong>${(qmRate*100).toFixed(1)}%</strong></div>
+      <div class="qm-row"><span>QM tax owing (on $${grossWithTax.toFixed(0)} gross incl. tax)</span><strong>$${qmTax.toFixed(2)}</strong></div>
+      <div class="qm-row"><span>Standard method owing</span><strong>$${netTax.toFixed(2)}</strong></div>
+      <div class="qm-row" style="font-weight:700;border-top:1px solid #fde68a;margin-top:6px;padding-top:6px;">
+        <span>${saving > 0 ? '💡 Quick Method saves you' : '📌 Standard method saves you'}</span>
+        <strong style="color:${saving > 0 ? '#16a34a':'#dc2626'};">$${Math.abs(saving).toFixed(2)}</strong>
+      </div>
+      <p style="font-size:11px;color:#92400e;margin-top:8px;">Quick Method figures shown are for a service-based business. Retail businesses use a lower remittance rate. Once elected, Quick Method must be used for a full fiscal year. Consult a CPA before electing.</p>
+    `;
+    qmSection.style.display = 'block';
+  } else {
+    qmSection.style.display = 'none';
+  }
+
+  // Deadline
+  const dl = getGSTDeadline(period, year);
+  document.getElementById('dl-title').textContent = period + ' ' + year + ' Filing Deadline';
+  document.getElementById('dl-date').textContent  = dl;
+
+  // ITC Detail
+  const itcDetailCard = document.getElementById('itc-detail-card');
+  const itcDetailRows = document.getElementById('itc-detail-rows');
+  if (itcDetail.length > 0) {
+    itcDetailCard.style.display = 'block';
+    itcDetailRows.innerHTML = itcDetail.map(d => `
+      <div class="result-row">
+        <span class="label">${d.desc} <span class="badge ${d.type==='blocked'?'badge-red':d.type==='meals'||d.type==='vehicle'?'badge-orange':'badge-green'}" style="margin-left:6px;">${d.type}</span></span>
+        <span class="value">ITC: $${d.itcAmt.toFixed(2)} ${d.blocked>0?`<small style="color:#94a3b8;"> (blocked: $${d.blocked.toFixed(2)})</small>`:''}</span>
+      </div>
+    `).join('');
+  } else {
+    itcDetailCard.style.display = 'none';
+  }
+}
+
+function getGSTDeadline(period, year) {
+  const y = parseInt(year);
+  const deadlines = {
+    'Q1': `April 30, ${y}`, 'Q2': `July 31, ${y}`,
+    'Q3': `October 31, ${y}`, 'Q4': `January 31, ${y+1}`,
+    'Monthly': 'Last day of the following month',
+    'Annual':  '3 months after your fiscal year-end',
+  };
+  return deadlines[period] || 'Check CRA My Business Account';
+}
+
+function resetGST() {
+  document.getElementById('revenue-items').innerHTML = '';
+  document.getElementById('expense-items').innerHTML = '';
+  document.getElementById('annualRevenue').value = '';
+  revenueLines = []; expenseLines = [];
+  addRevenueLine('Consulting / Services', '', 'taxable');
+  addExpenseLine('Office Rent', '', 'full');
+  addExpenseLine('Software Subscriptions', '', 'full');
+  addExpenseLine('Business Meals', '', 'meals');
+}
+
+// ══════════════════════════════════════════════
+// PAYROLL CALCULATOR — 2026 Rates
+// ══════════════════════════════════════════════
+const CPP = {
+  rate: 0.0595, maxPensionable: 68500, basicExemption: 3500,
+  maxContribution: (68500 - 3500) * 0.0595,
+  cpp2Rate: 0.04, cpp2Max: 73200, cpp2Min: 68500,
+};
+const EI = {
+  empRate: 0.0166, erFactor: 1.4, maxInsurable: 63200,
+  maxEmpPremium: 63200 * 0.0166,
+};
+
+const fedBrackets = [
+  { min: 0,      max: 57375,   rate: 0.15  },
+  { min: 57375,  max: 114750,  rate: 0.205 },
+  { min: 114750, max: 158520,  rate: 0.26  },
+  { min: 158520, max: 220000,  rate: 0.29  },
+  { min: 220000, max: Infinity,rate: 0.33  },
+];
+
+const provBrackets = {
+  ON: [
+    { min: 0,      max: 51446,   rate: 0.0505 },
+    { min: 51446,  max: 102894,  rate: 0.0915 },
+    { min: 102894, max: 150000,  rate: 0.1116 },
+    { min: 150000, max: 220000,  rate: 0.1216 },
+    { min: 220000, max: Infinity,rate: 0.1316 },
+  ],
+  // Alberta 2025 brackets (indexed annually — verify 2026 with CRA T4032 AB tables)
+  AB: [
+    { min: 0,       max: 148269,  rate: 0.10 },
+    { min: 148269,  max: 177922,  rate: 0.12 },
+    { min: 177922,  max: 237230,  rate: 0.13 },
+    { min: 237230,  max: 355845,  rate: 0.14 },
+    { min: 355845,  max: Infinity,rate: 0.15 },
+  ],
+  BC: [
+    { min: 0,      max: 45654,   rate: 0.0506 },
+    { min: 45654,  max: 91310,   rate: 0.077  },
+    { min: 91310,  max: 104835,  rate: 0.105  },
+    { min: 104835, max: 127299,  rate: 0.1229 },
+    { min: 127299, max: 172602,  rate: 0.147  },
+    { min: 172602, max: 240716,  rate: 0.168  },
+    { min: 240716, max: Infinity,rate: 0.205  },
+  ],
+  default: [{ min: 0, max: Infinity, rate: 0.10 }],
+};
+
+function calcTax(annualIncome, brackets, personalCredit) {
+  let tax = 0;
+  for (const b of brackets) {
+    if (annualIncome <= b.min) break;
+    tax += (Math.min(annualIncome, b.max) - b.min) * b.rate;
+  }
+  return Math.max(0, tax - (personalCredit || 0));
+}
+
+function recalcPayroll() {
+  const gross = parseFloat(document.getElementById('gross-pay').value) || 0;
+  if (gross <= 0) {
+    ['p-cpp-ee','p-cpp2-ee','p-ei-ee','p-fed-tax','p-prov-tax','p-total-deductions',
+     'p-net-pay','p-cpp-er','p-ei-er','p-remittance','p-total-cost'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+    document.getElementById('p-remittance-deadline').style.display = 'none';
+    return;
+  }
+
+  const periodsPerYear = parseInt(document.getElementById('pay-period').value);
+  const prov    = document.getElementById('pay-province').value;
+  const td1Fed  = parseFloat(document.getElementById('td1-federal').value)   || 16129;
+  const td1Prov = parseFloat(document.getElementById('td1-provincial').value) || 11865;
+  const ageGroup = document.getElementById('emp-age').value;
+  const annualGross = gross * periodsPerYear;
+
+  // CPP
+  let cppEE = 0, cppER = 0, cpp2EE = 0;
+  if (ageGroup === 'working') {
+    const annualCPP = Math.min(Math.max(0, annualGross - CPP.basicExemption) * CPP.rate, CPP.maxContribution);
+    cppEE = annualCPP / periodsPerYear;
+    cppER = cppEE;
+    const cpp2Eligible = Math.min(annualGross, CPP.cpp2Max) - CPP.cpp2Min;
+    if (cpp2Eligible > 0) cpp2EE = Math.min(cpp2Eligible * CPP.cpp2Rate, 188) / periodsPerYear;
+  }
+
+  // EI
+  const annualEI = Math.min(annualGross, EI.maxInsurable) * EI.empRate;
+  const eiEE = annualEI / periodsPerYear;
+  const eiER = eiEE * EI.erFactor;
+
+  // Federal income tax
+  const fedCredit = td1Fed * 0.15;
+  const annualFedTax  = calcTax(annualGross, fedBrackets, fedCredit);
+  const fedTaxPeriod  = Math.max(0, annualFedTax) / periodsPerYear;
+
+  // Provincial income tax
+  const brackets = provBrackets[prov] || provBrackets['default'];
+  const provCredit = td1Prov * brackets[0].rate;
+  const annualProvTax = calcTax(annualGross, brackets, provCredit);
+  const provTaxPeriod = Math.max(0, annualProvTax) / periodsPerYear;
+
+  // Totals
+  const totalDeductions = cppEE + cpp2EE + eiEE + fedTaxPeriod + provTaxPeriod;
+  const netPay          = gross - totalDeductions;
+  const totalRemittance = totalDeductions + cppER + eiER;
+  const totalEmployerCost = gross + cppER + eiER;
+
+  const fmt = v => '$' + v.toFixed(2);
+  document.getElementById('p-cpp-ee').textContent          = fmt(cppEE);
+  document.getElementById('p-cpp2-ee').textContent         = cpp2EE > 0 ? fmt(cpp2EE) : '$0.00';
+  document.getElementById('p-ei-ee').textContent           = fmt(eiEE);
+  document.getElementById('p-fed-tax').textContent         = fmt(fedTaxPeriod);
+  document.getElementById('p-prov-tax').textContent        = fmt(provTaxPeriod) + ` (${prov})`;
+  document.getElementById('p-total-deductions').textContent= fmt(totalDeductions);
+  document.getElementById('p-net-pay').textContent         = fmt(netPay);
+  document.getElementById('p-cpp-er').textContent          = fmt(cppER);
+  document.getElementById('p-ei-er').textContent           = fmt(eiER);
+  document.getElementById('p-remittance').textContent      = fmt(totalRemittance);
+  document.getElementById('p-total-cost').textContent      = fmt(totalEmployerCost);
+
+  document.getElementById('p-remittance-deadline').style.display = 'flex';
+  document.getElementById('p-dl-title').textContent = 'CRA Remittance Deadline';
+  document.getElementById('p-dl-note').textContent  = 'Regular remitters: 15th of the following month. Confirm your remitter type in CRA My Business Account.';
+}
+
+function resetPayroll() {
+  document.getElementById('gross-pay').value = '';
+  recalcPayroll();
+}
+
+// ══════════════════════════════════════════════
+// CRA DEADLINES
+// ══════════════════════════════════════════════
+function renderDeadlines() {
+  const bizType = document.getElementById('dl-biz-type').value;
+  const gstFreq = document.getElementById('dl-gst-freq').value;
+  const fye     = parseInt(document.getElementById('dl-fye').value);
+  const hasEmp  = document.getElementById('dl-has-employees').value === 'yes';
+  const year    = parseInt(document.getElementById('dl-year').value);
+
+  const items = [];
+
+  // GST/HST
+  if (gstFreq === 'quarterly') {
+    items.push({ month:'Apr', day:30, title:'Q1 GST/HST Filing Due', desc:`Net tax for Jan–Mar ${year}. File and remit online via CRA My Business Account.`, tags:['GST/HST','Quarterly'] });
+    items.push({ month:'Jul', day:31, title:'Q2 GST/HST Filing Due', desc:`Net tax for Apr–Jun ${year}.`, tags:['GST/HST','Quarterly'] });
+    items.push({ month:'Oct', day:31, title:'Q3 GST/HST Filing Due', desc:`Net tax for Jul–Sep ${year}.`, tags:['GST/HST','Quarterly'] });
+    items.push({ month:'Jan', day:31, title:'Q4 GST/HST Filing Due', desc:`Net tax for Oct–Dec ${year}. Filed in ${year+1}.`, tags:['GST/HST','Quarterly'] });
+  } else if (gstFreq === 'monthly') {
+    items.push({ month:'Monthly', day:null, title:'Monthly GST/HST Filing', desc:`Due by the last day of the following month for each reporting period. Set up auto-reminders.`, tags:['GST/HST','Monthly'] });
+  } else if (gstFreq === 'annual') {
+    const fyeDeadlines = {1:'Apr 30',2:'May 31',3:'Jun 30',4:'Jul 31',5:'Aug 31',6:'Sep 30',7:'Oct 31',8:'Nov 30',9:'Dec 31',10:`Jan 31, ${year+1}`,11:`Feb 28, ${year+1}`,12:`Mar 31, ${year+1}`};
+    items.push({ month:'Annual', day:null, title:'Annual GST/HST Filing', desc:`Due ${fyeDeadlines[fye]||'3 months after fiscal year-end'}. Annual filers with net tax ≥ $3,000 must make quarterly instalments.`, tags:['GST/HST','Annual'] });
+  }
+
+  // Corporate Tax
+  if (bizType === 'corp') {
+    const fyeMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fyeMonth  = fyeMonths[fye - 1];
+    const balMonth  = fyeMonths[(fye + 1) % 12];
+    const t2Month   = fyeMonths[(fye + 5) % 12];
+    items.push({ month: balMonth, day:28, title:'Corporate Tax Balance Due', desc:`Payment due 2 months after ${fyeMonth} 31 year-end. CCPCs with taxable income ≤ $500K get 3 months.`, tags:['T2','Payment'] });
+    items.push({ month: t2Month,  day:30, title:'T2 Return Filing Deadline', desc:`6 months after ${fyeMonth} 31 fiscal year-end. File online via My Business Account or your accountant.`, tags:['T2','Filing'] });
+    items.push({ month:'Mar', day:15, title:'Q1 Corporate Tax Instalment', desc:`First instalment if prior-year taxes > $3,000.`, tags:['T2','Instalment'] });
+    items.push({ month:'Jun', day:15, title:'Q2 Corporate Tax Instalment', desc:`Second quarterly corporate tax instalment.`, tags:['T2','Instalment'] });
+    items.push({ month:'Sep', day:15, title:'Q3 Corporate Tax Instalment', desc:`Third quarterly corporate tax instalment.`, tags:['T2','Instalment'] });
+    items.push({ month:'Dec', day:15, title:'Q4 Corporate Tax Instalment', desc:`Final quarterly corporate tax instalment.`, tags:['T2','Instalment'] });
+  } else {
+    items.push({ month:'Apr', day:30, title:'Personal Tax Balance Due', desc:`Payment of personal income tax owing for ${year}. Interest accrues from May 1 if unpaid.`, tags:['T1','Payment'] });
+    items.push({ month:'Jun', day:15, title:'T1 Return Filing Deadline', desc:`Filing deadline for self-employed individuals. Note: balance is still due April 30.`, tags:['T1','Filing'] });
+    items.push({ month:'Mar', day:15, title:'Q1 Income Tax Instalment', desc:`First quarterly instalment for sole proprietors whose prior-year taxes > $3,000.`, tags:['T1','Instalment'] });
+    items.push({ month:'Jun', day:15, title:'Q2 Income Tax Instalment', desc:`Second quarterly instalment.`, tags:['T1','Instalment'] });
+    items.push({ month:'Sep', day:15, title:'Q3 Income Tax Instalment', desc:`Third quarterly instalment.`, tags:['T1','Instalment'] });
+    items.push({ month:'Dec', day:15, title:'Q4 Income Tax Instalment', desc:`Final quarterly instalment.`, tags:['T1','Instalment'] });
+  }
+
+  // Payroll
+  if (hasEmp) {
+    items.push({ month:'Monthly', day:15, title:'Payroll Remittance (Regular)', desc:`CPP + EI + income tax due by the 15th of each following month. Accelerated remitters have different deadlines.`, tags:['Payroll','Monthly'] });
+    items.push({ month:'Feb', day:28, title:'T4 Slips & T4 Summary Due', desc:`File T4 slips with CRA AND deliver to all employees by February 28.`, tags:['Payroll','T4'] });
+    items.push({ month:'Ongoing', day:null, title:'Record of Employment (ROE)', desc:`Issue within 5 calendar days of any interruption of earnings (termination, layoff, leave). File via Service Canada ROE Web.`, tags:['Payroll','ROE'] });
+  }
+
+  // SR&ED
+  items.push({ month:'Annual', day:null, title:'SR&ED Claim Deadline (T661)', desc:`File T661 within 12 months of T2 due date (18 months after year-end). Document all qualifying R&D work as you go.`, tags:['SR&ED','Annual'] });
+
+  const tagColors = {
+    'GST/HST':'badge-blue','T2':'badge-orange','T1':'badge-green','Payroll':'badge-red',
+    'SR&ED':'badge-orange','Payment':'badge-red','Filing':'badge-blue','Instalment':'badge-blue',
+    'Annual':'badge-blue','Monthly':'badge-orange','Quarterly':'badge-blue','T4':'badge-green','ROE':'badge-orange',
+  };
+
+  const container = document.getElementById('deadline-list');
+  container.innerHTML = items.map(item => {
+    const tags = item.tags.map(t => `<span class="badge ${tagColors[t]||'badge-blue'}">${t}</span>`).join('');
+    return `
+      <div class="deadline-card">
+        <div class="dc-month">
+          <div class="m">${item.month}</div>
+          <div class="d">${item.day || '★'}</div>
+        </div>
+        <div class="dc-body">
+          <h4>${item.title}</h4>
+          <p>${item.desc}</p>
+          <div class="tags">${tags}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.onload = () => {
+  addRevenueLine('Consulting / Services', '85000', 'taxable');
+  addRevenueLine('Product Sales', '15000', 'taxable');
+  addExpenseLine('Office Rent', '12000', 'full');
+  addExpenseLine('Software & Subscriptions', '3600', 'full');
+  addExpenseLine('Business Meals', '2400', 'meals');
+  addExpenseLine('Professional Fees (Legal/Acctg)', '5000', 'full');
+  recalcGST();
+  recalcPayroll();
+  renderDeadlines();
+};
+</script>
+</body>
+</html>

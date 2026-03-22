@@ -1,0 +1,59 @@
+{
+  "name": "canadian-tax-cra",
+  "version": "0.3.0",
+  "description": "CRA compliance assistant for Canadian small business owners — GST/HST, payroll, corporate tax, and SR&ED",
+  "author": {
+    "name": "Srivatsa Kasagar"
+  },
+  "keywords": ["canada", "cra", "tax", "gst", "hst", "payroll", "t2", "sred", "small-business"],
+  "commands": [
+    {
+      "name": "gst-filing",
+      "description": "Calculate net GST/HST owing, ITC breakdown, Quick Method comparison, and filing summary",
+      "file": "commands/gst-filing.md"
+    },
+    {
+      "name": "payroll-calc",
+      "description": "Calculate CPP, EI, income tax deductions, employer costs, net pay, and CRA remittance",
+      "file": "commands/payroll-calc.md"
+    },
+    {
+      "name": "cra-deadlines",
+      "description": "Generate a personalized 12-month CRA deadline calendar",
+      "file": "commands/cra-deadlines.md"
+    },
+    {
+      "name": "sred-screen",
+      "description": "Screen a project for SR&ED tax credit eligibility (Green / Yellow / Red rating)",
+      "file": "commands/sred-screen.md"
+    },
+    {
+      "name": "grant-finder",
+      "description": "Find applicable federal and provincial grant programs ranked by value",
+      "file": "commands/grant-finder.md"
+    },
+    {
+      "name": "t2-checklist",
+      "description": "Generate a T2 corporate tax preparation checklist tailored to your corporation",
+      "file": "commands/t2-checklist.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "gst-hst-compliance",
+      "file": "skills/gst-hst-compliance/SKILL.md"
+    },
+    {
+      "name": "payroll-remittances",
+      "file": "skills/payroll-remittances/SKILL.md"
+    },
+    {
+      "name": "corporate-tax-t2",
+      "file": "skills/corporate-tax-t2/SKILL.md"
+    },
+    {
+      "name": "sred-grants",
+      "file": "skills/sred-grants/SKILL.md"
+    }
+  ]
+}
