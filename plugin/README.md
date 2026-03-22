@@ -14,6 +14,7 @@ A plain-language CRA compliance assistant for Canadian small business owners. Co
 | `/sred-screen` | Screen a project for SR&ED tax credit eligibility (Green / Yellow / Red rating) |
 | `/grant-finder` | Find applicable federal and provincial grant programs ranked by value |
 | `/t2-checklist` | Generate a T2 corporate tax preparation checklist tailored to your corporation |
+| `/salary-vs-dividend` | Compare salary vs dividends from your CCPC — after-tax income, RRSP room, CPP impact, and optimal mix |
 
 ### Example Usage
 
@@ -34,6 +35,9 @@ fund developer hiring and AI R&D work
 
 /t2-checklist Ontario corporation, March 31 fiscal year-end, active business income,
 purchased $40K in equipment, paid $50K dividend to sole shareholder
+
+/salary-vs-dividend Ontario CCPC, $300K corporate net income, want to take out $120K personally,
+RRSP priority high, under 65
 ```
 
 ---
@@ -79,6 +83,6 @@ This plugin provides general tax and CRA compliance information for educational 
 
 ---
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 **Author:** Srivatsa Kasagar
 **Covers:** Federal obligations across all provinces and territories

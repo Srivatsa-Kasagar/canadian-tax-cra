@@ -222,7 +222,7 @@
       <span style="font-size:22px;">🍁</span>
       <div>
         <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:-0.2px;">Canadian Business Tax Calculator</div>
-        <div style="color:rgba(255,255,255,0.55);font-size:11px;">GST/HST · Payroll · CRA Deadlines · 2026 Rates</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;">GST/HST · Payroll · CRA Deadlines · Salary vs Dividend · 2026 Rates</div>
       </div>
     </div>
     <a href="index.html" style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,0.25);padding:6px 14px;border-radius:8px;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
@@ -236,6 +236,7 @@
   <div class="tab active" onclick="switchTab('gst', event)">📊 GST/HST Calculator</div>
   <div class="tab" onclick="switchTab('payroll', event)">👤 Payroll Deductions</div>
   <div class="tab" onclick="switchTab('deadlines', event)">📅 CRA Deadlines</div>
+  <div class="tab" onclick="switchTab('svd', event)">⚖️ Salary vs Dividend</div>
 </div>
 
 <!-- ════════════════════════════════════════════
@@ -590,6 +591,97 @@
   <div id="deadline-list" class="deadline-grid"></div>
   <div class="disclaimer" style="margin-top:16px;">
     ⚠️ Deadline dates shown are general guidelines. Exact dates depend on your specific registration date, filing history, and CRA account status. When a deadline falls on a weekend or holiday, it is generally extended to the next business day. Always verify with CRA My Business Account at canada.ca/en/revenue-agency.
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     TAB 4 — SALARY VS DIVIDEND OPTIMIZER
+     ════════════════════════════════════════════ -->
+<div id="pane-svd" class="pane">
+<div class="container">
+
+  <!-- INPUTS -->
+  <div class="grid-2" style="align-items:start;margin-bottom:20px;">
+    <div class="card">
+      <h2><span class="icon">⚙️</span> Your Situation</h2>
+      <div class="field">
+        <label>Province of Residence</label>
+        <select id="svd-prov" onchange="recalcSVD()">
+          <option value="ON" selected>Ontario</option>
+          <option value="BC">British Columbia</option>
+          <option value="AB">Alberta</option>
+          <option value="MB">Manitoba</option>
+          <option value="SK">Saskatchewan</option>
+          <option value="NS">Nova Scotia</option>
+          <option value="NB">New Brunswick</option>
+          <option value="QC">Quebec</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Corporate Net Income (before paying yourself)</label>
+        <input type="number" id="svd-corp-income" value="300000" min="0" oninput="recalcSVD()" />
+        <div class="hint">Active business income before any salary or dividend</div>
+      </div>
+      <div class="field">
+        <label>Amount to Take Out Personally</label>
+        <input type="number" id="svd-personal" value="120000" min="0" oninput="recalcSVD()" />
+        <div class="hint">Total salary + dividends combined</div>
+      </div>
+      <div class="field">
+        <label>CPP Priority</label>
+        <select id="svd-cpp" onchange="recalcSVD()">
+          <option value="yes">Under 65 — want CPP retirement benefits</option>
+          <option value="no">CPP not a priority / age 65+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>RRSP Priority</label>
+        <select id="svd-rrsp" onchange="recalcSVD()">
+          <option value="high">High — want to maximize RRSP room</option>
+          <option value="low">Low — have enough room or don't use RRSP</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RECOMMENDATION -->
+    <div>
+      <div class="card" id="svd-recommendation-card">
+        <h2><span class="icon">💡</span> Recommendation</h2>
+        <div id="svd-recommendation">Enter your details to see your optimal mix.</div>
+      </div>
+      <div class="card" style="margin-top:20px;">
+        <h2><span class="icon">📋</span> RRSP & CPP Notes</h2>
+        <div id="svd-notes" class="deduction-breakdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="card">
+    <h2><span class="icon">⚖️</span> Side-by-Side Comparison</h2>
+    <div class="grid-3">
+      <!-- Salary -->
+      <div class="result-card">
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">💼 100% Salary</div>
+        <div id="svd-salary-results"></div>
+      </div>
+      <!-- Dividend -->
+      <div class="result-card">
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">📈 100% Non-Eligible Dividend</div>
+        <div id="svd-div-results"></div>
+      </div>
+      <!-- Optimal -->
+      <div class="result-card refund">
+        <div style="font-size:13px;font-weight:700;color:#15803d;margin-bottom:12px;">✅ Optimal Mix</div>
+        <div id="svd-optimal-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer" style="margin-top:16px;">
+    ⚠️ This calculator uses simplified 2026 rate estimates. It does not account for other personal income, spouse income, prior-year RRSP carry-forward, passive income rules, or provincial surtaxes. The optimal split in practice depends on your full tax picture. Have a CPA model your specific situation before deciding.
   </div>
 </div>
 </div>
@@ -1072,6 +1164,185 @@ function renderDeadlines() {
 }
 
 // ══════════════════════════════════════════════
+// SALARY VS DIVIDEND OPTIMIZER
+// ══════════════════════════════════════════════
+
+const svdProvData = {
+  ON: { name:'Ontario',          corpSBD:0.122, corpGen:0.265, provBrackets:[{max:51446,r:0.0505},{max:102894,r:0.0915},{max:150000,r:0.1116},{max:220000,r:0.1216},{max:Infinity,r:0.1316}], provBPA:11981, nedDTC:0.032876 },
+  BC: { name:'British Columbia', corpSBD:0.110, corpGen:0.270, provBrackets:[{max:45654,r:0.0506},{max:91310,r:0.077},{max:104835,r:0.105},{max:127299,r:0.1229},{max:172602,r:0.147},{max:240716,r:0.168},{max:Infinity,r:0.205}], provBPA:11981, nedDTC:0.02 },
+  AB: { name:'Alberta',          corpSBD:0.110, corpGen:0.270, provBrackets:[{max:148269,r:0.10},{max:177922,r:0.12},{max:237230,r:0.13},{max:355845,r:0.14},{max:Infinity,r:0.15}], provBPA:21003, nedDTC:0.0 },
+  MB: { name:'Manitoba',         corpSBD:0.120, corpGen:0.270, provBrackets:[{max:47000,r:0.108},{max:100000,r:0.1275},{max:Infinity,r:0.174}], provBPA:15780, nedDTC:0.0 },
+  SK: { name:'Saskatchewan',     corpSBD:0.110, corpGen:0.270, provBrackets:[{max:49720,r:0.105},{max:142058,r:0.125},{max:Infinity,r:0.145}], provBPA:17661, nedDTC:0.0 },
+  NS: { name:'Nova Scotia',      corpSBD:0.130, corpGen:0.290, provBrackets:[{max:29590,r:0.0879},{max:59180,r:0.1495},{max:93000,r:0.1667},{max:150000,r:0.175},{max:Infinity,r:0.21}], provBPA:8481, nedDTC:0.0 },
+  NB: { name:'New Brunswick',    corpSBD:0.120, corpGen:0.290, provBrackets:[{max:47715,r:0.094},{max:95431,r:0.14},{max:176756,r:0.16},{max:Infinity,r:0.195}], provBPA:12458, nedDTC:0.0 },
+  QC: { name:'Quebec',           corpSBD:0.122, corpGen:0.265, provBrackets:[{max:51780,r:0.14},{max:103545,r:0.19},{max:126000,r:0.24},{max:Infinity,r:0.2575}], provBPA:17183, nedDTC:0.0 },
+};
+
+// Federal brackets 2026
+const fedBrackets = [
+  {max:57375,   r:0.15},
+  {max:114750,  r:0.205},
+  {max:158520,  r:0.26},
+  {max:220000,  r:0.29},
+  {max:Infinity,r:0.33},
+];
+const FED_BPA = 16129;
+// CPP 2026
+const CPP_RATE = 0.0595, CPP_MAX_EARN = 68500, CPP_EXEMPTION = 3500;
+const CPP_MAX_EACH = (CPP_MAX_EARN - CPP_EXEMPTION) * CPP_RATE; // 3867.50
+// RRSP 2026
+const RRSP_RATE = 0.18, RRSP_MAX = 32490;
+
+function calcBracketTax(income, brackets) {
+  let tax = 0, prev = 0;
+  for (const b of brackets) {
+    if (income <= prev) break;
+    tax += (Math.min(income, b.max) - prev) * b.r;
+    prev = b.max;
+  }
+  return tax;
+}
+
+function calcPersonalTaxOnSalary(salary, prov) {
+  const pd = svdProvData[prov];
+  const fedTax = Math.max(0, calcBracketTax(salary, fedBrackets) - FED_BPA * 0.15);
+  const provTax = Math.max(0, calcBracketTax(salary, pd.provBrackets) - pd.provBPA * pd.provBrackets[0].r);
+  return fedTax + provTax;
+}
+
+function calcPersonalTaxOnNED(dividend, prov) {
+  // Non-eligible dividend: gross-up 15%, then apply brackets, subtract DTC
+  const pd = svdProvData[prov];
+  const grossed = dividend * 1.15;
+  const fedTax = Math.max(0, calcBracketTax(grossed, fedBrackets) - FED_BPA * 0.15 - grossed * 0.0903);
+  const provTax = Math.max(0, calcBracketTax(grossed, pd.provBrackets) - pd.provBPA * pd.provBrackets[0].r - grossed * pd.nedDTC);
+  return fedTax + provTax;
+}
+
+function calcCPP(salary) {
+  if (salary <= CPP_EXEMPTION) return {employee:0, employer:0};
+  const base = Math.min(salary, CPP_MAX_EARN) - CPP_EXEMPTION;
+  const each = base * CPP_RATE;
+  return {employee: each, employer: each};
+}
+
+function svdScenario(salary, dividend, prov) {
+  const pd = svdProvData[prov];
+  const cpp = calcCPP(salary);
+  const corpTaxSaved = salary * (pd.corpSBD); // salary deducted from SBD-rate income
+  const divCorpTax = dividend * pd.corpSBD;   // corp pays SBD tax before paying dividend
+  const personalTaxSalary = salary > 0 ? calcPersonalTaxOnSalary(salary, prov) : 0;
+  const personalTaxDiv = dividend > 0 ? calcPersonalTaxOnNED(dividend, prov) : 0;
+  const rrspRoom = Math.min(salary * RRSP_RATE, RRSP_MAX);
+  const netPersonal = salary + dividend - cpp.employee - personalTaxSalary - personalTaxDiv;
+  const totalTax = cpp.employee + cpp.employer + personalTaxSalary + personalTaxDiv + divCorpTax - corpTaxSaved;
+  return { netPersonal, totalTax, rrspRoom, cppEmployee:cpp.employee, cppEmployer:cpp.employer, personalTaxSalary, personalTaxDiv, corpTaxSaved, divCorpTax };
+}
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-CA'); }
+
+function renderSVDResults(elId, s) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `
+    <div class="deduction-row"><span class="d-label">Net after-tax income</span><span class="d-value">${fmt(s.netPersonal)}</span></div>
+    <div class="deduction-row"><span class="d-label">Personal income tax</span><span class="d-value">${fmt(s.personalTaxSalary + s.personalTaxDiv)}</span></div>
+    <div class="deduction-row"><span class="d-label">CPP (employee + employer)</span><span class="d-value">${fmt(s.cppEmployee + s.cppEmployer)}</span></div>
+    <div class="deduction-row"><span class="d-label">Corporate tax on div income</span><span class="d-value">${fmt(s.divCorpTax)}</span></div>
+    <div class="deduction-row"><span class="d-label">Corp tax saved (salary deduction)</span><span class="d-value" style="color:#16a34a;">${fmt(s.corpTaxSaved)}</span></div>
+    <div class="deduction-row" style="border-top:2px solid #e2e8f0;margin-top:8px;padding-top:8px;"><span class="d-label" style="font-weight:700;">Total tax cost</span><span class="d-value" style="font-size:16px;">${fmt(s.totalTax)}</span></div>
+    <div class="deduction-row"><span class="d-label">RRSP room generated</span><span class="d-value">${fmt(s.rrspRoom)}</span></div>
+  `;
+}
+
+function recalcSVD() {
+  const prov        = document.getElementById('svd-prov').value;
+  const corpIncome  = parseFloat(document.getElementById('svd-corp-income').value) || 0;
+  const personal    = parseFloat(document.getElementById('svd-personal').value) || 0;
+  const cppPriority = document.getElementById('svd-cpp').value;
+  const rrspPriority= document.getElementById('svd-rrsp').value;
+  const pd          = svdProvData[prov];
+
+  // Cap personal at corp income
+  const take = Math.min(personal, corpIncome);
+
+  // Scenario A: 100% salary
+  const sA = svdScenario(take, 0, prov);
+
+  // Scenario B: 100% non-eligible dividend
+  const sB = svdScenario(0, take, prov);
+
+  // Scenario C: optimal mix
+  // Heuristic: pay salary up to CPP max (~$68,500) if CPP is a priority, or up to RRSP max (~$32,490/0.18 = ~$180,500) if RRSP priority is high
+  // Then fill remainder with dividends
+  let optSalary = 0;
+  if (cppPriority === 'yes') {
+    optSalary = Math.min(take, CPP_MAX_EARN); // up to $68,500 for CPP
+  }
+  if (rrspPriority === 'high') {
+    // Enough salary to generate max RRSP room ($32,490 / 0.18 = $180,500) but at least CPP amount
+    const rrspTarget = Math.ceil(RRSP_MAX / RRSP_RATE);
+    optSalary = Math.max(optSalary, Math.min(take, rrspTarget));
+  }
+  if (optSalary === 0) {
+    // Neither CPP nor RRSP priority — compare marginal rates and lean dividend
+    optSalary = Math.min(take, 57375); // at least clear the basic personal amount bracket
+  }
+  const optDiv = Math.max(0, take - optSalary);
+  const sC = svdScenario(optSalary, optDiv, prov);
+
+  // Render
+  renderSVDResults('svd-salary-results', sA);
+  renderSVDResults('svd-div-results', sB);
+  renderSVDResults('svd-optimal-results', sC);
+
+  // Best scenario for headline
+  const best = Math.min(sA.totalTax, sB.totalTax, sC.totalTax);
+  const saving = Math.min(sA.totalTax, sB.totalTax) - sC.totalTax;
+
+  const recEl = document.getElementById('svd-recommendation');
+  recEl.innerHTML = `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:4px;">${fmt(sC.netPersonal)}</div>
+      <div style="font-size:13px;color:#64748b;">Estimated net after-tax income with optimal mix</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:12px;">
+      <strong>Recommended mix for ${pd.name}:</strong><br/>
+      Salary: <strong>${fmt(optSalary)}</strong> + Non-Eligible Dividends: <strong>${fmt(optDiv)}</strong>
+      ${saving > 100 ? `<br/><span style="color:#15803d;">Saves approx. ${fmt(saving)} vs the worse alternative.</span>` : ''}
+    </div>
+    <div style="font-size:12px;color:#64748b;line-height:1.6;">
+      ${cppPriority === 'yes' ? '✅ Salary up to $68,500 preserves CPP contributions.<br/>' : ''}
+      ${rrspPriority === 'high' ? `✅ Salary of ${fmt(optSalary)} generates ${fmt(sC.rrspRoom)} in RRSP room.<br/>` : ''}
+      📌 Dividends require no payroll remittances — simpler cash flow.
+    </div>
+  `;
+
+  // Notes
+  document.getElementById('svd-notes').innerHTML = `
+    <div class="deduction-section">
+      <h4>RRSP Room</h4>
+      <div class="deduction-row"><span class="d-label">100% Salary</span><span class="d-value">${fmt(sA.rrspRoom)}</span></div>
+      <div class="deduction-row"><span class="d-label">100% Dividend</span><span class="d-value">$0</span></div>
+      <div class="deduction-row"><span class="d-label">Optimal Mix</span><span class="d-value">${fmt(sC.rrspRoom)}</span></div>
+    </div>
+    <div class="deduction-section">
+      <h4>CPP Cost (both sides)</h4>
+      <div class="deduction-row"><span class="d-label">100% Salary</span><span class="d-value">${fmt(sA.cppEmployee + sA.cppEmployer)}</span></div>
+      <div class="deduction-row"><span class="d-label">100% Dividend</span><span class="d-value">$0</span></div>
+      <div class="deduction-row"><span class="d-label">Optimal Mix</span><span class="d-value">${fmt(sC.cppEmployee + sC.cppEmployer)}</span></div>
+    </div>
+    <div class="deduction-section">
+      <h4>2026 Rates Used</h4>
+      <div class="deduction-row"><span class="d-label">CPP rate</span><span class="d-value">5.95% each</span></div>
+      <div class="deduction-row"><span class="d-label">CPP max earnings</span><span class="d-value">$68,500</span></div>
+      <div class="deduction-row"><span class="d-label">RRSP rate</span><span class="d-value">18% of salary</span></div>
+      <div class="deduction-row"><span class="d-label">Corp rate (SBD, ${pd.name})</span><span class="d-value">${(pd.corpSBD*100).toFixed(1)}%</span></div>
+      <div class="deduction-row"><span class="d-label">NED gross-up</span><span class="d-value">15%</span></div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
 window.onload = () => {
@@ -1084,6 +1355,7 @@ window.onload = () => {
   recalcGST();
   recalcPayroll();
   renderDeadlines();
+  recalcSVD();
 };
 </script>
 </body>

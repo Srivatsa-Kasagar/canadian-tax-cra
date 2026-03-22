@@ -1,6 +1,6 @@
 {
   "name": "canadian-tax-cra",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CRA compliance assistant for Canadian small business owners — GST/HST, payroll, corporate tax, and SR&ED",
   "author": {
     "name": "Srivatsa Kasagar"
@@ -36,6 +36,11 @@
       "name": "t2-checklist",
       "description": "Generate a T2 corporate tax preparation checklist tailored to your corporation",
       "file": "commands/t2-checklist.md"
+    },
+    {
+      "name": "salary-vs-dividend",
+      "description": "Compare salary vs dividends from your CCPC — after-tax income, RRSP room, CPP impact, and optimal mix recommendation",
+      "file": "commands/salary-vs-dividend.md"
     }
   ],
   "skills": [
