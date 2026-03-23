@@ -233,10 +233,10 @@
 
 <!-- ── TABS ── -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('gst', event)">📊 GST/HST Calculator</div>
-  <div class="tab" onclick="switchTab('payroll', event)">👤 Payroll Deductions</div>
-  <div class="tab" onclick="switchTab('deadlines', event)">📅 CRA Deadlines</div>
-  <div class="tab" onclick="switchTab('svd', event)">⚖️ Salary vs Dividend</div>
+  <div class="tab active" onclick="switchTab('gst', this)">📊 GST/HST Calculator</div>
+  <div class="tab" onclick="switchTab('payroll', this)">👤 Payroll Deductions</div>
+  <div class="tab" onclick="switchTab('deadlines', this)">📅 CRA Deadlines</div>
+  <div class="tab" onclick="switchTab('svd', this)">⚖️ Salary vs Dividend</div>
 </div>
 
 <!-- ════════════════════════════════════════════
@@ -727,11 +727,11 @@ const revenueTypes = {
 // ══════════════════════════════════════════════
 // TAB SWITCHER
 // ══════════════════════════════════════════════
-function switchTab(id, event) {
+function switchTab(id, el) {
   document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('pane-' + id).classList.add('active');
-  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  if (el) el.classList.add('active');
 }
 
 // ══════════════════════════════════════════════
