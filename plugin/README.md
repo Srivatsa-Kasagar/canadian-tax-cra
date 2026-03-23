@@ -15,6 +15,7 @@ A plain-language CRA compliance assistant for Canadian small business owners. Co
 | `/grant-finder` | Find applicable federal and provincial grant programs ranked by value |
 | `/t2-checklist` | Generate a T2 corporate tax preparation checklist tailored to your corporation |
 | `/salary-vs-dividend` | Compare salary vs dividends from your CCPC — after-tax income, RRSP room, CPP impact, and optimal mix |
+| `/expense-optimizer` | Identify every CRA-allowable deduction, calculate write-off amounts, flag audit risks, and surface missed deductions |
 
 ### Example Usage
 
@@ -38,6 +39,9 @@ purchased $40K in equipment, paid $50K dividend to sole shareholder
 
 /salary-vs-dividend Ontario CCPC, $300K corporate net income, want to take out $120K personally,
 RRSP priority high, under 65
+
+/expense-optimizer Ontario corporation, consulting business, $200K revenue, work from home 20%,
+vehicle 50% business use, paid $5K professional fees, $3K software
 ```
 
 ---
@@ -83,6 +87,6 @@ This plugin provides general tax and CRA compliance information for educational 
 
 ---
 
-**Version:** 0.4.0
+**Version:** 0.5.0
 **Author:** Srivatsa Kasagar
 **Covers:** Federal obligations across all provinces and territories

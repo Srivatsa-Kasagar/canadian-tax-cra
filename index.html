@@ -182,7 +182,7 @@
       <!-- Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
         <div class="stat-card">
-          <div class="text-3xl font-bold text-white mb-1">7</div>
+          <div class="text-3xl font-bold text-white mb-1">8</div>
           <div class="text-slate-400 text-sm">Slash Commands</div>
         </div>
         <div class="stat-card">
@@ -320,7 +320,7 @@
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-14">
         <p class="section-label mb-3">Slash Commands</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Seven commands for every CRA workflow</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Eight commands for every CRA workflow</h2>
         <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">Each command collects your inputs, applies CRA rules, and produces a structured, filing-ready output. Claude asks for any missing details in a single prompt.</p>
       </div>
 
@@ -434,6 +434,24 @@
           </div>
         </div>
 
+        <!-- expense-optimizer -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/expense-optimizer</code>
+            <p class="text-slate-600 text-sm mt-1">Walks through every CRA-allowable business expense category and calculates your total deductions. Includes special handling for work-from-home corporations (rent-to-corp structure), vehicle business-use %, CCA on equipment, PHSP health premiums, and meals 50% cap. Flags CRA audit triggers and surfaces deductions you may have missed.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">Deduction summary</span>
+              <span class="output-tag output-blue">Home office (WFH)</span>
+              <span class="output-tag output-red">Audit red flags</span>
+              <span class="output-tag output-orange">Missing deductions</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/expense-optimizer</span> <span class="arg">Ontario corporation, consulting, $200K revenue,</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;work from home 20%, vehicle 50% business use, $3K software</span>
+          </div>
+        </div>
+
         <!-- salary-vs-dividend -->
         <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
           <div class="mb-4">
@@ -477,6 +495,7 @@
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Payroll Deductions (2026)</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">CRA Deadline Calendar</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Salary vs Dividend Optimizer</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Expense Optimizer</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">All 13 provinces</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Print-ready</span>
           </div>

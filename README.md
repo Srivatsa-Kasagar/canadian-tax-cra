@@ -3,7 +3,7 @@
 > A plain-language CRA compliance assistant for Canadian small business owners.
 > No tax background required.
 
-![Version](https://img.shields.io/badge/version-0.4.0-dc2626?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.5.0-dc2626?style=flat-square)
 ![Rates](https://img.shields.io/badge/rates-2026%20CRA-0f172a?style=flat-square)
 ![Coverage](https://img.shields.io/badge/coverage-all%20provinces%20%26%20territories-1e3a5f?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-slate?style=flat-square)
@@ -20,7 +20,7 @@ Everything runs locally. No API keys, no external connections, no data leaves yo
 
 | | |
 |---|---|
-| **7 slash commands** | On-demand calculations and checklists |
+| **8 slash commands** | On-demand calculations and checklists |
 | **4 knowledge skills** | Auto-load when relevant topics come up |
 | **Interactive calculator** | Browser-based GST/HST + payroll tool |
 | **2026 CRA rates** | CPP, EI, federal + all provincial tax brackets |
@@ -41,6 +41,7 @@ Type any of these directly in Claude Code:
 | `/grant-finder` | Find applicable federal and provincial grant programs ranked by potential value for your situation |
 | `/t2-checklist` | Generate a T2 corporate tax preparation checklist tailored to your province, fiscal year-end, and income type |
 | `/salary-vs-dividend` | Compare salary vs dividends from your CCPC — after-tax income, RRSP room, CPP impact, and optimal mix recommendation |
+| `/expense-optimizer` | Identify every CRA-allowable deduction, calculate write-off amounts, flag audit risks, and surface missed deductions including home office and vehicle |
 
 ### Example Prompts
 
@@ -147,6 +148,6 @@ This plugin provides general CRA compliance information for **educational purpos
 
 <div align="center">
 
-**v0.4.0** &nbsp;·&nbsp; 2026 CRA Rates &nbsp;·&nbsp; All Provinces & Territories &nbsp;·&nbsp; By [Srivatsa Kasagar](https://github.com/Srivatsa-Kasagar)
+**v0.5.0** &nbsp;·&nbsp; 2026 CRA Rates &nbsp;·&nbsp; All Provinces & Territories &nbsp;·&nbsp; By [Srivatsa Kasagar](https://github.com/Srivatsa-Kasagar)
 
 </div>

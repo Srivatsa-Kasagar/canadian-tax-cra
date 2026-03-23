@@ -1,6 +1,6 @@
 {
   "name": "canadian-tax-cra",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "CRA compliance assistant for Canadian small business owners — GST/HST, payroll, corporate tax, and SR&ED",
   "author": {
     "name": "Srivatsa Kasagar"
@@ -41,6 +41,11 @@
       "name": "salary-vs-dividend",
       "description": "Compare salary vs dividends from your CCPC — after-tax income, RRSP room, CPP impact, and optimal mix recommendation",
       "file": "commands/salary-vs-dividend.md"
+    },
+    {
+      "name": "expense-optimizer",
+      "description": "Identify every CRA-allowable business expense deduction, calculate write-off amounts, flag audit risks, and surface missed deductions including work-from-home and vehicle guidance",
+      "file": "commands/expense-optimizer.md"
     }
   ],
   "skills": [

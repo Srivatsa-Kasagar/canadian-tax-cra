@@ -231,7 +231,7 @@
       <span style="font-size:22px;">🍁</span>
       <div>
         <div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:-0.2px;">Canadian Business Tax Calculator</div>
-        <div style="color:rgba(255,255,255,0.55);font-size:11px;">GST/HST · Payroll · CRA Deadlines · Salary vs Dividend · 2026 Rates</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;">GST/HST · Payroll · CRA Deadlines · Salary vs Dividend · Expense Optimizer · 2026 Rates</div>
       </div>
     </div>
     <a href="index.html" style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,0.25);padding:6px 14px;border-radius:8px;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
@@ -246,6 +246,7 @@
   <div class="tab" onclick="switchTab('payroll', this)">👤 Payroll Deductions</div>
   <div class="tab" onclick="switchTab('deadlines', this)">📅 CRA Deadlines</div>
   <div class="tab" onclick="switchTab('svd', this)">⚖️ Salary vs Dividend</div>
+  <div class="tab" onclick="switchTab('expenses', this)">🧾 Expense Optimizer</div>
 </div>
 
 <!-- ════════════════════════════════════════════
@@ -691,6 +692,161 @@
 
   <div class="disclaimer" style="margin-top:16px;">
     ⚠️ This calculator uses simplified 2026 rate estimates. It does not account for other personal income, spouse income, prior-year RRSP carry-forward, passive income rules, or provincial surtaxes. The optimal split in practice depends on your full tax picture. Have a CPA model your specific situation before deciding.
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     TAB 5 — EXPENSE OPTIMIZER
+     ════════════════════════════════════════════ -->
+<div id="pane-expenses" class="pane">
+<div class="container">
+
+  <!-- TOP ROW: Setup + Home Office -->
+  <div class="grid-2" style="align-items:start;margin-bottom:20px;">
+
+    <!-- Setup -->
+    <div class="card">
+      <h2><span class="icon">⚙️</span> Business Profile</h2>
+      <div class="field">
+        <label>Business Structure</label>
+        <select id="exp-structure" onchange="recalcExp()">
+          <option value="corp">Corporation (CCPC)</option>
+          <option value="sole">Sole Proprietor / Partnership</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Province</label>
+        <select id="exp-prov" onchange="recalcExp()">
+          <option value="ON" selected>Ontario</option>
+          <option value="BC">British Columbia</option>
+          <option value="AB">Alberta</option>
+          <option value="MB">Manitoba</option>
+          <option value="SK">Saskatchewan</option>
+          <option value="NS">Nova Scotia</option>
+          <option value="NB">New Brunswick</option>
+          <option value="QC">Quebec</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Annual Revenue</label>
+        <input type="number" id="exp-revenue" value="200000" min="0" oninput="recalcExp()" />
+        <div class="hint">Used to assess CRA audit risk ratios</div>
+      </div>
+      <div class="field">
+        <label>Work From Home?</label>
+        <select id="exp-wfh" onchange="toggleWFH(); recalcExp()">
+          <option value="yes">Yes — primary place of business</option>
+          <option value="hybrid">Hybrid — some days at home</option>
+          <option value="no">No — separate office</option>
+        </select>
+      </div>
+      <!-- WFH inputs -->
+      <div id="exp-wfh-fields">
+        <div class="field">
+          <label>Home Office % (sq ft ÷ total home sq ft)</label>
+          <input type="number" id="exp-office-pct" value="15" min="1" max="60" oninput="recalcExp()" />
+          <div class="hint">Typical: 10–25%. Above 35% invites CRA scrutiny.</div>
+        </div>
+        <div class="field">
+          <label>Monthly Home Costs (rent/mortgage interest + utilities + internet + property tax + insurance)</label>
+          <input type="number" id="exp-home-costs" value="3000" min="0" oninput="recalcExp()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle -->
+    <div class="card">
+      <h2><span class="icon">🚗</span> Vehicle</h2>
+      <div class="field">
+        <label>Use Vehicle for Business?</label>
+        <select id="exp-vehicle" onchange="toggleVehicle(); recalcExp()">
+          <option value="yes">Yes — I track business km</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div id="exp-vehicle-fields">
+        <div class="field">
+          <label>Business Use %</label>
+          <input type="number" id="exp-veh-biz-pct" value="50" min="1" max="100" oninput="recalcExp()" />
+          <div class="hint">Over 80% triggers scrutiny without a logbook.</div>
+        </div>
+        <div class="field">
+          <label>Annual Operating Costs (gas + insurance + maintenance + licensing)</label>
+          <input type="number" id="exp-veh-costs" value="8000" min="0" oninput="recalcExp()" />
+        </div>
+        <div class="field">
+          <label>Vehicle Purchase Price</label>
+          <input type="number" id="exp-veh-price" value="30000" min="0" oninput="recalcExp()" />
+          <div class="hint">CRA caps Class 10.1 (passenger vehicles) at $38,000.</div>
+        </div>
+      </div>
+      <h2 style="margin-top:20px;"><span class="icon">🏥</span> Health Benefits</h2>
+      <div class="field">
+        <label>Annual PHSP Premiums</label>
+        <input type="number" id="exp-phsp" value="0" min="0" oninput="recalcExp()" />
+        <div class="hint">Private Health Services Plan — fully deductible for corps. Often overlooked.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSE INPUTS -->
+  <div class="card" style="margin-bottom:20px;">
+    <h2><span class="icon">📋</span> Business Expenses</h2>
+    <div class="grid-3">
+      <div>
+        <div class="field"><label>Salaries & Wages (employees)</label><input type="number" id="exp-salaries" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Owner Salary / Management Fees</label><input type="number" id="exp-owner-salary" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Subcontractors & Consultants</label><input type="number" id="exp-contractors" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Professional Fees (legal, accounting)</label><input type="number" id="exp-professional" value="5000" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Business Insurance (NOT life insurance)</label><input type="number" id="exp-insurance" value="2000" min="0" oninput="recalcExp()" /></div>
+      </div>
+      <div>
+        <div class="field"><label>Software & Subscriptions (SaaS)</label><input type="number" id="exp-software" value="3000" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Equipment / Computers (Class 50, 55%)</label><input type="number" id="exp-computers" value="0" min="0" oninput="recalcExp()" /><div class="hint">CCA applies — first-year shown in results</div></div>
+        <div class="field"><label>Office Furniture & Equipment (Class 8, 20%)</label><input type="number" id="exp-furniture" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Small Tools / Software Purchases under $500 (Class 12)</label><input type="number" id="exp-tools" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Marketing & Advertising</label><input type="number" id="exp-marketing" value="0" min="0" oninput="recalcExp()" /></div>
+      </div>
+      <div>
+        <div class="field"><label>Meals & Entertainment</label><input type="number" id="exp-meals" value="0" min="0" oninput="recalcExp()" /><div class="hint">50% deductible — CRA cap applies</div></div>
+        <div class="field"><label>Business Travel (flights, hotels, ground)</label><input type="number" id="exp-travel" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Phone — Business Portion</label><input type="number" id="exp-phone" value="1200" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Training & Professional Development</label><input type="number" id="exp-training" value="0" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Office Supplies & Postage</label><input type="number" id="exp-supplies" value="500" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Bank Fees & Business Loan Interest</label><input type="number" id="exp-bank" value="500" min="0" oninput="recalcExp()" /></div>
+        <div class="field"><label>Other Business Expenses</label><input type="number" id="exp-other" value="0" min="0" oninput="recalcExp()" /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="grid-2" style="align-items:start;margin-bottom:20px;">
+    <div class="card">
+      <h2><span class="icon">📊</span> Deductible Summary</h2>
+      <div id="exp-summary"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <h2><span class="icon">⚠️</span> CRA Audit Red Flags</h2>
+        <div id="exp-redflags"></div>
+      </div>
+      <div class="card">
+        <h2><span class="icon">💡</span> Deductions You May Be Missing</h2>
+        <div id="exp-missing"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME OFFICE SUMMARY -->
+  <div id="exp-wfh-summary-card" class="card" style="margin-bottom:20px;display:none;">
+    <h2><span class="icon">🏠</span> Home Office — How It Works for Your Corporation</h2>
+    <div id="exp-wfh-summary"></div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ This tool provides general estimates based on CRA rules. Exact deductibility depends on documentation, facts, and your specific circumstances. Have a CPA review expense claims before filing — especially home office, vehicle, and mixed-use items.
   </div>
 </div>
 </div>
@@ -1352,6 +1508,178 @@ function recalcSVD() {
 }
 
 // ══════════════════════════════════════════════
+// EXPENSE OPTIMIZER
+// ══════════════════════════════════════════════
+
+const expCorpRates = {
+  ON:0.122, BC:0.110, AB:0.110, MB:0.120, SK:0.110, NS:0.130, NB:0.120, QC:0.122
+};
+
+function toggleWFH() {
+  const wfh = document.getElementById('exp-wfh').value;
+  document.getElementById('exp-wfh-fields').style.display = wfh !== 'no' ? 'block' : 'none';
+}
+
+function toggleVehicle() {
+  const v = document.getElementById('exp-vehicle').value;
+  document.getElementById('exp-vehicle-fields').style.display = v === 'yes' ? 'block' : 'none';
+}
+
+function expFmt(n) { return '$' + Math.round(n).toLocaleString('en-CA'); }
+
+function recalcExp() {
+  const structure   = document.getElementById('exp-structure').value;
+  const prov        = document.getElementById('exp-prov').value;
+  const revenue     = parseFloat(document.getElementById('exp-revenue').value) || 0;
+  const wfh         = document.getElementById('exp-wfh').value;
+  const officePct   = (parseFloat(document.getElementById('exp-office-pct').value) || 0) / 100;
+  const homeCosts   = (parseFloat(document.getElementById('exp-home-costs').value) || 0) * 12;
+  const vehUse      = document.getElementById('exp-vehicle').value;
+  const vehBizPct   = (parseFloat(document.getElementById('exp-veh-biz-pct').value) || 0) / 100;
+  const vehCosts    = parseFloat(document.getElementById('exp-veh-costs').value) || 0;
+  const vehPrice    = parseFloat(document.getElementById('exp-veh-price').value) || 0;
+  const corpRate    = expCorpRates[prov] || 0.122;
+
+  // Individual expense inputs
+  const salaries    = parseFloat(document.getElementById('exp-salaries').value) || 0;
+  const ownerSal    = parseFloat(document.getElementById('exp-owner-salary').value) || 0;
+  const contractors = parseFloat(document.getElementById('exp-contractors').value) || 0;
+  const professional= parseFloat(document.getElementById('exp-professional').value) || 0;
+  const insurance   = parseFloat(document.getElementById('exp-insurance').value) || 0;
+  const software    = parseFloat(document.getElementById('exp-software').value) || 0;
+  const computers   = parseFloat(document.getElementById('exp-computers').value) || 0;
+  const furniture   = parseFloat(document.getElementById('exp-furniture').value) || 0;
+  const tools       = parseFloat(document.getElementById('exp-tools').value) || 0;
+  const marketing   = parseFloat(document.getElementById('exp-marketing').value) || 0;
+  const meals       = parseFloat(document.getElementById('exp-meals').value) || 0;
+  const travel      = parseFloat(document.getElementById('exp-travel').value) || 0;
+  const phone       = parseFloat(document.getElementById('exp-phone').value) || 0;
+  const training    = parseFloat(document.getElementById('exp-training').value) || 0;
+  const supplies    = parseFloat(document.getElementById('exp-supplies').value) || 0;
+  const bank        = parseFloat(document.getElementById('exp-bank').value) || 0;
+  const phsp        = parseFloat(document.getElementById('exp-phsp').value) || 0;
+  const other       = parseFloat(document.getElementById('exp-other').value) || 0;
+
+  // Calculated deductions
+  const homeDeduct    = wfh !== 'no' ? homeCosts * officePct : 0;
+  const vehOpDeduct   = vehUse === 'yes' ? vehCosts * vehBizPct : 0;
+  const vehCapped     = Math.min(vehPrice, 38000);
+  const vehCCADeduct  = vehUse === 'yes' ? vehCapped * 0.15 * vehBizPct : 0; // half-year 15%
+  const mealsDeduct   = meals * 0.5;
+  const computersDeduct = computers * 0.275; // Class 50: 55% × 50% half-year
+  const furnitureDeduct = furniture * 0.10;  // Class 8: 20% × 50% half-year
+  const toolsDeduct   = tools * 0.50;        // Class 12: 100% × 50% half-year
+
+  const rows = [
+    { label: 'Home office' + (structure==='corp' ? ' (rent to corp)' : ''), amount: homeDeduct, pct: wfh!=='no'?officePct*100:0, rule: structure==='corp'?'Corp pays rent to owner':'T2125 direct deduction' },
+    { label: 'Vehicle — operating costs', amount: vehOpDeduct, pct: vehUse==='yes'?vehBizPct*100:0, rule: 'Business-use % — logbook required' },
+    { label: 'Vehicle — CCA (first year)', amount: vehCCADeduct, pct: vehUse==='yes'?vehBizPct*100:0, rule: vehPrice>38000?'Class 10.1 capped at $38,000':'Class 10 — half-year rule' },
+    { label: 'Salaries & wages', amount: salaries, pct: 100, rule: 'Fully deductible' },
+    { label: 'Owner salary / management fees', amount: ownerSal, pct: 100, rule: 'Must be reasonable market rate' },
+    { label: 'Subcontractors & consultants', amount: contractors, pct: 100, rule: 'T4A required if >$500/year' },
+    { label: 'Professional fees', amount: professional, pct: 100, rule: 'Business-related only' },
+    { label: 'Business insurance', amount: insurance, pct: 100, rule: 'NOT life insurance premiums' },
+    { label: 'PHSP premiums', amount: phsp, pct: 100, rule: 'Group plan required' },
+    { label: 'Software & subscriptions', amount: software, pct: 100, rule: 'Current expense — fully deductible' },
+    { label: 'Computers & equipment (CCA Class 50)', amount: computersDeduct, pct: 27.5, rule: '55% rate × half-year = 27.5% first year' },
+    { label: 'Office furniture (CCA Class 8)', amount: furnitureDeduct, pct: 10, rule: '20% rate × half-year = 10% first year' },
+    { label: 'Small tools / software <$500 (Class 12)', amount: toolsDeduct, pct: 50, rule: '100% rate × half-year = 50% first year' },
+    { label: 'Marketing & advertising', amount: marketing, pct: 100, rule: 'Fully deductible' },
+    { label: 'Meals & entertainment (50%)', amount: mealsDeduct, pct: 50, rule: 'ITA s.67.1 — 50% cap' },
+    { label: 'Business travel', amount: travel, pct: 100, rule: 'Business purpose required' },
+    { label: 'Phone (business portion)', amount: phone, pct: 100, rule: 'Document calculation method' },
+    { label: 'Training & development', amount: training, pct: 100, rule: 'Current business use only' },
+    { label: 'Office supplies', amount: supplies, pct: 100, rule: 'Fully deductible' },
+    { label: 'Bank fees & interest', amount: bank, pct: 100, rule: 'Business accounts only' },
+    { label: 'Other expenses', amount: other, pct: 100, rule: 'As documented' },
+  ].filter(r => r.amount > 0);
+
+  const totalDeduct = rows.reduce((s, r) => s + r.amount, 0);
+  const taxSaved = totalDeduct * corpRate;
+
+  // Render summary table
+  const summaryEl = document.getElementById('exp-summary');
+  summaryEl.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="text-align:left;padding:7px 8px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;">Expense</th>
+            <th style="text-align:right;padding:7px 8px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;">Deductible</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:6px 8px;color:#334155;">${r.label}</td>
+              <td style="padding:6px 8px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;color:#1e293b;">${expFmt(r.amount)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="background:#f0fdf4;border-top:2px solid #bbf7d0;">
+            <td style="padding:10px 8px;font-weight:700;color:#15803d;">Total Deductions</td>
+            <td style="padding:10px 8px;text-align:right;font-weight:800;font-size:16px;color:#15803d;font-family:'JetBrains Mono',monospace;">${expFmt(totalDeduct)}</td>
+          </tr>
+          <tr style="background:#eff6ff;">
+            <td style="padding:8px 8px;color:#1e40af;font-weight:600;">Est. Tax Saved (${(corpRate*100).toFixed(1)}% SBD rate)</td>
+            <td style="padding:8px 8px;text-align:right;font-weight:700;color:#1e40af;font-family:'JetBrains Mono',monospace;">${expFmt(taxSaved)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  `;
+
+  // Red flags
+  const flags = [];
+  if (meals > revenue * 0.01) flags.push({ icon:'🚨', text:`Meals claim (${expFmt(meals)}) exceeds 1% of revenue — CRA commonly audits this ratio.` });
+  if (vehUse === 'yes' && vehBizPct > 0.80) flags.push({ icon:'🚨', text:`Vehicle business-use ${Math.round(vehBizPct*100)}% is high — a detailed logbook is essential to support this claim.` });
+  if (wfh !== 'no' && officePct > 0.35) flags.push({ icon:'⚠️', text:`Home office ${Math.round(officePct*100)}% exceeds 35% — document the sq ft calculation clearly.` });
+  if (vehPrice > 38000 && vehUse === 'yes') flags.push({ icon:'ℹ️', text:`Vehicle exceeds $38,000 cap — CCA limited to $38,000 under Class 10.1. Operating costs still deductible at business-use %.` });
+  if (contractors > 0) flags.push({ icon:'ℹ️', text:`Contractors paid over $500/year require a T4A slip filed by the last day of February.` });
+
+  const flagEl = document.getElementById('exp-redflags');
+  flagEl.innerHTML = flags.length
+    ? flags.map(f => `<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;"><span>${f.icon}</span><span style="color:#334155;">${f.text}</span></div>`).join('')
+    : `<div style="color:#16a34a;font-size:13px;">✅ No major red flags detected based on your inputs.</div>`;
+
+  // Missing deductions
+  const missing = [];
+  if (phsp === 0 && structure === 'corp') missing.push('💊 <strong>PHSP not claimed</strong> — as a CCPC owner, group health plan premiums are fully deductible and convert personal health costs into a corporate deduction.');
+  if (computers === 0 && furniture === 0 && tools === 0) missing.push('💻 <strong>No equipment CCA claimed</strong> — if you purchased computers or office equipment this year, CCA applies.');
+  if (wfh !== 'no' && homeDeduct === 0) missing.push('🏠 <strong>Home office not calculated</strong> — enter your home costs above to see the deduction.');
+  if (training === 0) missing.push('📚 <strong>Training & development</strong> — courses, certifications, and professional memberships related to your business are fully deductible.');
+  if (insurance === 0) missing.push('🛡️ <strong>Business insurance</strong> — E&O, liability, and commercial insurance premiums are fully deductible.');
+
+  const missingEl = document.getElementById('exp-missing');
+  missingEl.innerHTML = missing.length
+    ? missing.map(m => `<div style="padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155;">${m}</div>`).join('')
+    : `<div style="color:#16a34a;font-size:13px;">✅ You've covered the main categories.</div>`;
+
+  // WFH corp explanation
+  const wfhCard = document.getElementById('exp-wfh-summary-card');
+  const wfhEl = document.getElementById('exp-wfh-summary');
+  if (wfh !== 'no' && structure === 'corp') {
+    wfhCard.style.display = 'block';
+    const monthlyRent = (parseFloat(document.getElementById('exp-home-costs').value) || 0) * officePct;
+    wfhEl.innerHTML = `
+      <div class="info-box">A corporation cannot directly deduct home office expenses. Instead, you (the owner) charge the corporation rent for use of the home office. The corp deducts the rent; you report rental income personally — but offset it with the same home costs. Net personal tax impact is near zero.</div>
+      <div class="deduction-breakdown">
+        <div class="deduction-row"><span class="d-label">Monthly home costs</span><span class="d-value">${expFmt(parseFloat(document.getElementById('exp-home-costs').value)||0)}</span></div>
+        <div class="deduction-row"><span class="d-label">Business-use %</span><span class="d-value">${Math.round(officePct*100)}%</span></div>
+        <div class="deduction-row"><span class="d-label">Monthly rent to charge corp</span><span class="d-value">${expFmt(monthlyRent)}</span></div>
+        <div class="deduction-row" style="border-top:2px solid #e2e8f0;margin-top:8px;padding-top:8px;"><span class="d-label" style="font-weight:700;">Annual corporate deduction</span><span class="d-value" style="font-size:16px;color:#15803d;">${expFmt(homeDeduct)}</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:#64748b;">
+        <strong>Documentation required:</strong> Written lease agreement between you personally and the corporation · Monthly rent invoices or journal entries · Floor plan or measurement supporting the % claimed.
+      </div>
+    `;
+  } else {
+    wfhCard.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
 window.onload = () => {
@@ -1365,6 +1693,7 @@ window.onload = () => {
   recalcPayroll();
   renderDeadlines();
   recalcSVD();
+  recalcExp();
 };
 </script>
 </body>
