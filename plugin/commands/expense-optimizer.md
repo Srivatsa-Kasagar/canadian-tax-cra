@@ -20,7 +20,11 @@ Options:
 
 **Province:**
 Question: "Which province is your business based in?"
-Options: Ontario · British Columbia · Alberta · Quebec · Manitoba · Saskatchewan · Nova Scotia · New Brunswick · Other
+Options:
+- Ontario
+- British Columbia
+- Alberta
+- Other (Quebec, Manitoba, Maritimes, etc.)
 
 **Work from home?**
 Question: "Do you work from home?"
@@ -47,39 +51,15 @@ If Yes, follow up in plain text (single message):
 
 ## Interaction 3 — All expenses at once (plain text)
 
-Send this as a single message — do not split into separate questions:
+Send this as a single conversational message:
 
-> "Almost done! Please fill in your **annual amounts** for any of the following that apply to your business. Leave blank or write $0 for anything that doesn't apply.
+> "What did your business spend money on this year? Just describe it however is easiest — a quick list, a paragraph, rough numbers are fine.
 >
-> **Payroll & People**
-> - Salaries & wages (employees, not yourself): $
-> - Owner salary / management fees: $
-> - Subcontractors & consultants: $
+> For example: *'Accounting $5,000, software subscriptions $3,200, bought a new laptop $2,400, meals with clients $2,800, marketing $4,000, phone about $100/month, two work trips $3,500. Work from home — office is about 15% of the house, home costs around $3,200/month. Vehicle 60% business, cost $28,000, running costs $7,500/year.'*
 >
-> **Home & Vehicle** *(skip if already provided)*
-> - Home office % of home sq ft: %
-> - Monthly home costs (rent/mortgage interest + utilities + internet + property tax + insurance): $
-> - Vehicle operating costs (annual): $
-> - Vehicle purchase price: $
-> - Vehicle business-use %: %
->
-> **Operations**
-> - Professional fees (accounting, legal): $
-> - Software & SaaS subscriptions: $
-> - Computer & equipment purchased this year: $
-> - Office furniture purchased this year: $
-> - Small tools / software items under $500 each: $
-> - Marketing & advertising: $
-> - Business travel (flights, hotels, transport): $
-> - Meals & entertainment (business-related): $
-> - Phone — business portion: $
-> - Training & professional development: $
-> - Office supplies & postage: $
-> - Bank fees & business loan interest: $
-> - Business insurance (E&O, liability, property): $
-> - Private Health Services Plan (PHSP) premiums: $
-> - Annual revenue (for audit ratio checks): $
-> - Other business expenses: $"
+> Include anything business-related. I'll handle the CRA math and flag anything that needs attention."
+
+Accept any format — paragraph, bullets, rough notes. Extract and infer amounts from whatever the user provides (e.g. "$100/month" → $1,200/year). Ask a single follow-up only if something is genuinely ambiguous for tax purposes (e.g. unclear whether an item is capital or current).
 
 ---
 
@@ -161,7 +141,7 @@ Only suggest items the user left blank that are relevant to their situation:
 - No PHSP → "PHSP premiums are fully deductible for CCPC owners and convert personal health costs into a corporate deduction."
 - No equipment CCA → "If you bought computers or equipment this year, CCA applies."
 - No home office → "If you work from home at all, the rent-to-corp structure can generate a meaningful deduction."
-- Tech business with no SR&ED → "Run /sred-screen — you may qualify for refundable R&D credits."
+- No SR&ED claimed and business involves any software development, product R&D, or technical problem-solving → "Run /sred-screen — you may qualify for refundable R&D tax credits worth up to 35% of eligible expenditures."
 
 #### Documentation Checklist
 List only what applies to claimed deductions: lease + invoices + floor plan (home office), logbook (vehicle), receipts + attendees (meals), itinerary + purpose (travel), contracts + T4A (contractors), purchase receipts (CCA), plan enrolment (PHSP).
