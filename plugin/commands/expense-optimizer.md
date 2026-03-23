@@ -49,17 +49,48 @@ If Yes, follow up in plain text (single message):
 
 ---
 
-## Interaction 3 — All expenses at once (plain text)
+## Interaction 3 — Expense input (two-path flow)
 
-Send this as a single conversational message:
+### Path A — Accounting software (ask first)
 
-> "What did your business spend money on this year? Just describe it however is easiest — a quick list, a paragraph, rough numbers are fine.
+Ask in plain text:
+
+> "Do you use QuickBooks, Wave, Xero, or another accounting tool? If so, paste your annual expense summary or transaction export here and I'll pull the numbers directly — no manual entry needed."
+
+If the user pastes a report or transaction list: extract all expense categories and amounts directly. Map them to CRA categories. Proceed to output.
+
+---
+
+### Path B — Editable block (if no accounting export)
+
+If the user doesn't have an export, reply with this block and ask them to fill in the numbers, delete rows that don't apply, and paste it back:
+
+> "No problem — fill in what applies below, delete the rest, and paste it back:
 >
-> For example: *'Accounting $5,000, software subscriptions $3,200, bought a new laptop $2,400, meals with clients $2,800, marketing $4,000, phone about $100/month, two work trips $3,500. Work from home — office is about 15% of the house, home costs around $3,200/month. Vehicle 60% business, cost $28,000, running costs $7,500/year.'*
+> ```
+> Owner salary / management fees:       $
+> Salaries & wages (employees):         $
+> Subcontractors & consultants:         $
+> Professional fees (accounting/legal): $
+> Software & subscriptions:             $
+> Marketing & advertising:              $
+> Meals & entertainment (business):     $
+> Business travel:                      $
+> Phone — business portion (monthly):   $
+> Training & development:               $
+> Office supplies:                      $
+> Bank fees & business loan interest:   $
+> Business insurance (not life):        $
+> PHSP health premiums:                 $
+> Equipment / computers purchased:      $
+> Other:                                $
 >
-> Include anything business-related. I'll handle the CRA math and flag anything that needs attention."
+> Annual revenue:                       $
+> Work from home — office % / monthly home costs:  __% / $__/month
+> Vehicle — business % / annual running costs / purchase price:  __% / $__ / $__
+> ```"
 
-Accept any format — paragraph, bullets, rough notes. Extract and infer amounts from whatever the user provides (e.g. "$100/month" → $1,200/year). Ask a single follow-up only if something is genuinely ambiguous for tax purposes (e.g. unclear whether an item is capital or current).
+Parse whatever the user returns — partial fills, rough numbers, and notes are all fine. Infer annualised amounts where monthly figures are given (e.g. "$120/month phone" → $1,440/year). Ask a single follow-up only if something is genuinely ambiguous for CRA purposes (e.g. unclear whether a purchase is capital or a current expense).
 
 ---
 
