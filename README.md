@@ -96,31 +96,23 @@ These load automatically when you mention relevant topics — no command needed.
 
 ## Installation
 
-**Step 1 — Clone the repo (one time)**
+**Step 1 — Add the marketplace & install (one time)**
 
 ```bash
-git clone https://github.com/Srivatsa-Kasagar/canadian-tax-cra.git
+# Register the marketplace
+claude plugin marketplace add Srivatsa-Kasagar/canadian-tax-cra
+
+# Install the plugin permanently
+claude plugin install canadian-tax-cra
 ```
 
-**Step 2 — Add a shell alias (one time, recommended)**
-
-The `--plugin-dir` flag must be passed every session. An alias makes this automatic:
+**Step 2 — Launch normally**
 
 ```bash
-# zsh (macOS default)
-echo "alias claude-tax='claude --plugin-dir ~/canadian-tax-cra/plugin'" >> ~/.zshrc && source ~/.zshrc
-
-# bash
-echo "alias claude-tax='claude --plugin-dir ~/canadian-tax-cra/plugin'" >> ~/.bashrc && source ~/.bashrc
+claude
 ```
 
-**Step 3 — Launch**
-
-```bash
-claude-tax
-```
-
-All eight commands and four skills are immediately available. Prefer not to use an alias? Pass the flag manually each session: `claude --plugin-dir ./canadian-tax-cra/plugin`.
+That's it. All eight commands and four skills load automatically in every Claude Code session — no cloning, no flags, no aliases needed.
 
 ---
 
