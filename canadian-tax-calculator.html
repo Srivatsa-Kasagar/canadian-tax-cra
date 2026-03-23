@@ -1178,8 +1178,8 @@ const svdProvData = {
   QC: { name:'Quebec',           corpSBD:0.122, corpGen:0.265, provBrackets:[{max:51780,r:0.14},{max:103545,r:0.19},{max:126000,r:0.24},{max:Infinity,r:0.2575}], provBPA:17183, nedDTC:0.0 },
 };
 
-// Federal brackets 2026
-const fedBrackets = [
+// Federal brackets 2026 (SVD optimizer)
+const svdFedBrackets = [
   {max:57375,   r:0.15},
   {max:114750,  r:0.205},
   {max:158520,  r:0.26},
@@ -1205,7 +1205,7 @@ function calcBracketTax(income, brackets) {
 
 function calcPersonalTaxOnSalary(salary, prov) {
   const pd = svdProvData[prov];
-  const fedTax = Math.max(0, calcBracketTax(salary, fedBrackets) - FED_BPA * 0.15);
+  const fedTax = Math.max(0, calcBracketTax(salary, svdFedBrackets) - FED_BPA * 0.15);
   const provTax = Math.max(0, calcBracketTax(salary, pd.provBrackets) - pd.provBPA * pd.provBrackets[0].r);
   return fedTax + provTax;
 }
@@ -1214,7 +1214,7 @@ function calcPersonalTaxOnNED(dividend, prov) {
   // Non-eligible dividend: gross-up 15%, then apply brackets, subtract DTC
   const pd = svdProvData[prov];
   const grossed = dividend * 1.15;
-  const fedTax = Math.max(0, calcBracketTax(grossed, fedBrackets) - FED_BPA * 0.15 - grossed * 0.0903);
+  const fedTax = Math.max(0, calcBracketTax(grossed, svdFedBrackets) - FED_BPA * 0.15 - grossed * 0.0903);
   const provTax = Math.max(0, calcBracketTax(grossed, pd.provBrackets) - pd.provBPA * pd.provBrackets[0].r - grossed * pd.nedDTC);
   return fedTax + provTax;
 }
