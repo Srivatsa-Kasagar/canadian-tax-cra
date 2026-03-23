@@ -36,16 +36,16 @@ Options:
 - Investment/passive income only (rental, dividends, interest)
 - Both active and investment income
 
-Question 4: "Did any of these occur this fiscal year? (Select all that apply — type the numbers)"
+Question 4: "Did any of these occur this fiscal year? (Select all that apply)"
 Header: "Special items"
+multiSelect: true
 Options:
-- 1. Dividends paid to shareholders
-- 2. Capital assets purchased or sold (equipment, vehicles, computers)
-- 3. Shareholder loans (money borrowed from or loaned to the corporation)
-- 4. Foreign income or non-resident transactions
-- 5. New employees hired for the first time
-- 6. SR&ED research and development work
-- 7. None of the above
+- Dividends paid to shareholders
+- Capital assets purchased or sold (equipment, vehicles, computers)
+- Shareholder loans (money borrowed from or loaned to the corporation)
+- Foreign income or non-resident transactions
+- New employees hired for the first time
+- SR&ED research and development work
 
 Wait for answers. Then ask in plain text:
 "Is your corporation a Canadian-Controlled Private Corporation (CCPC)? (Yes / No / Not sure)"

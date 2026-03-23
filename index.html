@@ -514,7 +514,7 @@
     <div class="max-w-3xl mx-auto">
       <div class="text-center mb-12">
         <p class="section-label mb-3">Installation</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Up and running in two steps</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Up and running in three steps</h2>
         <p class="text-slate-500 mt-4 text-base">No API keys. No environment variables. No external services. Fully self-contained.</p>
       </div>
 
@@ -523,24 +523,39 @@
         <div class="flex items-center gap-3 mb-4">
           <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
           <div>
-            <h3 class="font-bold text-slate-900">Install — one-time terminal step</h3>
-            <p class="text-slate-500 text-sm mt-0.5">Clone the repository and load it as a plugin when launching Claude Code.</p>
+            <h3 class="font-bold text-slate-900">Clone — one time</h3>
+            <p class="text-slate-500 text-sm mt-0.5">Download the plugin to your machine. Run this once from any directory you prefer.</p>
           </div>
         </div>
         <div class="code-block">
-          <span class="comment"># Clone the repository</span><br/>
-          git clone https://github.com/Srivatsa-Kasagar/canadian-tax-cra.git<br/>
-          <br/>
-          <span class="comment"># Launch Claude Code with the plugin loaded</span><br/>
-          claude --plugin ./canadian-tax-cra/plugin
+          git clone https://github.com/Srivatsa-Kasagar/canadian-tax-cra.git
         </div>
         <p class="text-slate-400 text-xs mt-3">Requires <a href="https://claude.ai/code" class="underline hover:text-slate-600">Claude Code CLI</a>. Fully self-contained — no keys or env vars needed.</p>
       </div>
 
       <!-- Step 2 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+          <div>
+            <h3 class="font-bold text-slate-900">Add a shell alias — one time, recommended</h3>
+            <p class="text-slate-500 text-sm mt-0.5">The <code class="bg-slate-100 text-slate-700 px-1 rounded text-xs">--plugin-dir</code> flag must be passed every session. An alias makes this automatic.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <span class="comment"># For zsh (macOS default)</span><br/>
+          echo <span class="arg">"alias claude-tax='claude --plugin-dir ~/canadian-tax-cra/plugin'"</span> >> ~/.zshrc &amp;&amp; source ~/.zshrc<br/>
+          <br/>
+          <span class="comment"># For bash</span><br/>
+          echo <span class="arg">"alias claude-tax='claude --plugin-dir ~/canadian-tax-cra/plugin'"</span> >> ~/.bashrc &amp;&amp; source ~/.bashrc
+        </div>
+        <p class="text-slate-400 text-xs mt-3">Then launch any session with <code class="bg-slate-800 text-slate-200 px-1.5 py-0.5 rounded text-xs font-mono">claude-tax</code> instead of <code class="bg-slate-800 text-slate-200 px-1.5 py-0.5 rounded text-xs font-mono">claude</code>. Or skip the alias and pass <code class="bg-slate-800 text-slate-200 px-1.5 py-0.5 rounded text-xs font-mono">--plugin-dir ./canadian-tax-cra/plugin</code> manually each time.</p>
+      </div>
+
+      <!-- Step 3 -->
       <div class="mb-4">
         <div class="flex items-center gap-3 mb-5">
-          <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+          <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
           <div>
             <h3 class="font-bold text-slate-900">Use it — two ways, your choice</h3>
             <p class="text-slate-500 text-sm mt-0.5">Once loaded, use structured slash commands or just ask in plain English. Both work.</p>
