@@ -1,0 +1,24 @@
+{
+  "name": "canadian-tax-cra",
+  "owner": {
+    "name": "Srivatsa Kasagar",
+    "url": "https://github.com/Srivatsa-Kasagar"
+  },
+  "metadata": {
+    "description": "Canadian Tax & CRA Compliance plugins for Claude Code — GST/HST, payroll, corporate tax (T2), SR&ED, and more for Canadian small business owners.",
+    "version": "0.5.0"
+  },
+  "plugins": [
+    {
+      "name": "canadian-tax-cra",
+      "source": "./plugin",
+      "description": "CRA compliance assistant — GST/HST filing, payroll deductions, T2 checklist, SR&ED screening, grant finder, salary vs dividend optimizer, and expense optimizer for Canadian small businesses.",
+      "version": "0.5.0",
+      "author": {
+        "name": "Srivatsa Kasagar"
+      },
+      "keywords": ["canada", "cra", "tax", "gst", "hst", "payroll", "t2", "sred", "small-business"],
+      "category": "finance"
+    }
+  ]
+}
