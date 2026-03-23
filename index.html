@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Canadian Tax & CRA Compliance — Claude Code Plugin</title>
-  <meta name="description" content="A Claude Code plugin covering GST/HST, payroll deductions, corporate income tax (T2), and SR&ED grants for Canadian small business owners. Six slash commands, four auto-activating skills, and an interactive browser calculator." />
+  <meta name="description" content="A Claude Code plugin covering GST/HST, payroll deductions, corporate income tax (T2), SR&ED grants, and salary vs dividend optimization for Canadian small business owners. Seven slash commands, four auto-activating skills, and an interactive browser calculator." />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -182,7 +182,7 @@
       <!-- Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
         <div class="stat-card">
-          <div class="text-3xl font-bold text-white mb-1">6</div>
+          <div class="text-3xl font-bold text-white mb-1">7</div>
           <div class="text-slate-400 text-sm">Slash Commands</div>
         </div>
         <div class="stat-card">
@@ -320,7 +320,7 @@
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-14">
         <p class="section-label mb-3">Slash Commands</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Six commands for every CRA workflow</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Seven commands for every CRA workflow</h2>
         <p class="text-slate-500 mt-4 text-base max-w-2xl mx-auto">Each command collects your inputs, applies CRA rules, and produces a structured, filing-ready output. Claude asks for any missing details in a single prompt.</p>
       </div>
 
@@ -434,6 +434,24 @@
           </div>
         </div>
 
+        <!-- salary-vs-dividend -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm">
+          <div class="mb-4">
+            <code class="text-blue-700 font-bold text-base" style="font-family:'JetBrains Mono',monospace;">/salary-vs-dividend</code>
+            <p class="text-slate-600 text-sm mt-1">The #1 question every CCPC owner asks. Runs a side-by-side comparison of 100% salary, 100% non-eligible dividends, and an optimal mix — showing after-tax personal income, CPP cost, RRSP room generated, corporate tax impact, and a plain-English recommendation.</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="output-tag output-green">After-tax comparison</span>
+              <span class="output-tag output-blue">Optimal mix</span>
+              <span class="output-tag output-orange">RRSP room</span>
+              <span class="output-tag output-blue">CPP cost-benefit</span>
+            </div>
+          </div>
+          <div class="code-block">
+            <span class="cmd">/salary-vs-dividend</span> <span class="arg">Ontario CCPC, $300K corporate net income,</span><br/>
+            <span class="arg">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;want to take out $120K personally, RRSP priority high, under 65</span>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -453,12 +471,12 @@
         <div class="flex-1">
           <div class="text-2xl mb-3">🍁</div>
           <h3 class="text-2xl font-bold mb-3">Canadian Business Tax Calculator</h3>
-          <p class="text-slate-300 text-sm leading-relaxed mb-5">An interactive calculator covering GST/HST net tax, Quick Method comparison, payroll deductions for all provinces, and a personalized CRA deadline calendar — no data leaves your device.</p>
+          <p class="text-slate-300 text-sm leading-relaxed mb-5">An interactive calculator covering GST/HST net tax, Quick Method comparison, payroll deductions for all provinces, CRA deadline calendar, and salary vs dividend optimization — no data leaves your device.</p>
           <div class="flex flex-wrap gap-2">
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">GST/HST Calculator</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Payroll Deductions (2026)</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">CRA Deadline Calendar</span>
-            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Quick Method comparison</span>
+            <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Salary vs Dividend Optimizer</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">All 13 provinces</span>
             <span class="text-xs bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 font-medium">Print-ready</span>
           </div>
